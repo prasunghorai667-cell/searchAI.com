@@ -1,3 +1,5 @@
+import { aiTools } from "./data.js";
+
 function searchAI() {
     const query = document.getElementById("searchInput").value.toLowerCase();
     const resultsDiv = document.getElementById("results");
