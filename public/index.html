@@ -68,7 +68,15 @@
 </div>
 
 <header>
-    <h1>⚡ searchAI</h1>
+    <div class="header-bar">
+        <a href="#" onclick="goHome(); return false;" class="home-btn" id="homeBtn">
+            <span class="home-icon">🏠</span>
+            <span class="home-text">Home</span>
+        </a>
+        <button class="back-btn" id="backBtn" onclick="clearSearch()" style="display: none;">
+            <span>←</span> Back
+        </button>
+    </div>
     <div class="search-container">
         <div class="search-wrapper">
             <input type="text" id="searchInput" placeholder="Search AI tools..." autocomplete="off">

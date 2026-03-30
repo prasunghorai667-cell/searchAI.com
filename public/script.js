@@ -551,10 +551,12 @@ function showOriginalContent() {
     const trendingSection = document.getElementById('trendingTools');
     const newsSection = document.getElementById('latestNews');
     const videosSection = document.querySelector('.videos');
+    const backBtn = document.getElementById('backBtn');
     
     trendingSection.style.display = 'block';
     newsSection.style.display = 'block';
     videosSection.style.display = 'block';
+    backBtn.style.display = 'none';
     isSearchActive = false;
 }
 
@@ -562,11 +564,17 @@ function hideOriginalContent() {
     const trendingSection = document.getElementById('trendingTools');
     const newsSection = document.getElementById('latestNews');
     const videosSection = document.querySelector('.videos');
+    const backBtn = document.getElementById('backBtn');
     
     trendingSection.style.display = 'none';
     newsSection.style.display = 'none';
     videosSection.style.display = 'none';
+    backBtn.style.display = 'flex';
     isSearchActive = true;
+}
+
+function goHome() {
+    clearSearch();
 }
 
 function searchAI() {
@@ -781,6 +789,7 @@ document.addEventListener('keydown', (e) => {
 
 window.selectSuggestion = selectSuggestion;
 window.clearSearch = clearSearch;
+window.goHome = goHome;
 window.searchAI = searchAI;
 window.openNewsModal = openNewsModal;
 window.closeNewsModal = closeNewsModal;
