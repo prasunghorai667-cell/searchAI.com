@@ -89,111 +89,7 @@
             <span class="news-badge">Trending Now</span>
         </div>
         
-        <div class="news-carousel">
-            <div class="news-card breaking">
-                <div class="news-badge-top">🔥 BREAKING</div>
-                <div class="news-content">
-                    <span class="news-category">OpenAI</span>
-                    <h3>OpenAI Unveils GPT-5 with Human-Level Reasoning</h3>
-                    <p>Revolutionary AI model achieves AGI milestone with unprecedented problem-solving capabilities...</p>
-                    <div class="news-meta">
-                        <span class="news-time">2 hours ago</span>
-                        <span class="news-read">5 min read</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="news-card trending">
-                <div class="news-badge-top">📈 TRENDING</div>
-                <div class="news-content">
-                    <span class="news-category">Google</span>
-                    <h3>Google Gemini Dominates Multimodal AI Benchmark</h3>
-                    <p>Gemini outperforms all competitors in text, image, audio, and video understanding tests...</p>
-                    <div class="news-meta">
-                        <span class="news-time">4 hours ago</span>
-                        <span class="news-read">3 min read</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="news-card must-read">
-                <div class="news-badge-top">⚡ MUST READ</div>
-                <div class="news-content">
-                    <span class="news-category">Anthropic</span>
-                    <h3>Claude 3.5 Sets New Standard for AI Safety</h3>
-                    <p>Latest Claude release achieves 98% safety score while maintaining top-tier performance...</p>
-                    <div class="news-meta">
-                        <span class="news-time">6 hours ago</span>
-                        <span class="news-read">4 min read</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="news-card analysis">
-                <div class="news-badge-top">🎯 ANALYSIS</div>
-                <div class="news-content">
-                    <span class="news-category">Healthcare</span>
-                    <h3>How AI is Transforming Healthcare in 2026</h3>
-                    <p>From diagnosis to drug discovery, AI revolutionizes patient care across major hospitals...</p>
-                    <div class="news-meta">
-                        <span class="news-time">8 hours ago</span>
-                        <span class="news-read">7 min read</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="news-card guide">
-                <div class="news-badge-top">💡 GUIDE</div>
-                <div class="news-content">
-                    <span class="news-category">Development</span>
-                    <h3>Top 10 AI Tools Every Developer Should Use</h3>
-                    <p>Complete guide to integrating AI into your development workflow for maximum productivity...</p>
-                    <div class="news-meta">
-                        <span class="news-time">10 hours ago</span>
-                        <span class="news-read">6 min read</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="news-card new">
-                <div class="news-badge-top">🚀 NEW</div>
-                <div class="news-content">
-                    <span class="news-category">Video AI</span>
-                    <h3>Sora Video AI Now Available for Everyone</h3>
-                    <p>OpenAI launches public access to Sora video generation with enhanced quality and speed...</p>
-                    <div class="news-meta">
-                        <span class="news-time">12 hours ago</span>
-                        <span class="news-read">3 min read</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="news-card breaking">
-                <div class="news-badge-top">🔥 BREAKING</div>
-                <div class="news-content">
-                    <span class="news-category">Robotics</span>
-                    <h3>Boston Dynamics Unveils Humanoid AI Robot</h3>
-                    <p>Next-generation robot with GPT-5 brain can perform complex tasks autonomously...</p>
-                    <div class="news-meta">
-                        <span class="news-time">1 day ago</span>
-                        <span class="news-read">5 min read</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="news-card trending">
-                <div class="news-badge-top">📈 TRENDING</div>
-                <div class="news-content">
-                    <span class="news-category">Startups</span>
-                    <h3>AI Startup Funding Reaches $50B in Q1 2026</h3>
-                    <p>Record investment in AI companies signals continued boom in artificial intelligence sector...</p>
-                    <div class="news-meta">
-                        <span class="news-time">1 day ago</span>
-                        <span class="news-read">4 min read</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div class="news-carousel" id="newsCarousel"></div>
     </section>
 
     <section id="results"></section>
@@ -206,6 +102,15 @@
         </div>
     </section>
 </main>
+
+<!-- NEWS MODAL -->
+<div id="newsModal" class="news-modal">
+    <div class="news-modal-overlay" onclick="closeNewsModal()"></div>
+    <div class="news-modal-content">
+        <button class="news-modal-close" onclick="closeNewsModal()">✕</button>
+        <div id="newsModalBody"></div>
+    </div>
+</div>
 
 <script type="module" src="script.js"></script>
 
