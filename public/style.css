@@ -11,16 +11,47 @@ header {
     text-align: center;
 }
 
+h1 {
+    margin: 0 0 20px 0;
+}
+
+.search-container {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+}
+
 input {
-    padding: 10px;
-    width: 300px;
+    padding: 12px;
+    width: 400px;
+    border: none;
+    border-radius: 8px 0 0 8px;
+    font-size: 16px;
 }
 
 button {
-    padding: 10px;
+    padding: 12px 20px;
     background: #22c55e;
     border: none;
+    border-radius: 0 8px 8px 0;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+button:hover {
+    background: #16a34a;
+}
+
+button svg {
+    color: white;
+}
+
+.search-hint {
+    font-size: 14px;
+    color: #94a3b8;
+    margin-top: 10px;
 }
 
 .news, .videos {
@@ -40,4 +71,35 @@ iframe {
 
 #results {
     padding: 20px;
+}
+
+.results-count {
+    color: #94a3b8;
+    margin-bottom: 10px;
+}
+
+.no-results {
+    text-align: center;
+    color: #94a3b8;
+    padding: 20px;
+}
+
+.result-card {
+    transition: transform 0.2s;
+}
+
+.result-card:hover {
+    transform: translateX(5px);
+}
+
+.match-reason {
+    font-size: 13px;
+    color: #22c55e;
+    margin: 5px 0;
+    font-style: italic;
+}
+
+.result-card button {
+    padding: 8px 16px;
+    border-radius: 6px;
 }
