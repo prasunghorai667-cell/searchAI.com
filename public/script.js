@@ -38,7 +38,6 @@ function calculateScore(tool, keywords) {
 function getMatchReasons(tool, keywords) {
     const reasons = [];
     const toolName = tool.name.toLowerCase();
-    const toolDesc = tool.description.toLowerCase();
     const toolTags = tool.tags.map(tag => tag.toLowerCase());
 
     keywords.forEach(keyword => {
@@ -53,6 +52,16 @@ function getMatchReasons(tool, keywords) {
     });
 
     return [...new Set(reasons)].slice(0, 3);
+}
+
+function getLogoUrl(link) {
+    try {
+        const url = new URL(link);
+        const domain = url.hostname.replace('www.', '');
+        return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+    } catch {
+        return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🤖</text></svg>';
+    }
 }
 
 function showSuggestions(query) {
@@ -82,8 +91,9 @@ function showSuggestions(query) {
     if (toolMatches.length > 0) {
         html += '<div class="suggestion-section">Tools</div>';
         toolMatches.forEach(tool => {
-            html += `<div class="suggestion-item" onclick="selectSuggestion('${tool.name}')">
-                <span class="suggestion-icon">🤖</span> ${tool.name}
+            html += `<div class="suggestion-item" onclick="selectSuggestion('${tool.name.replace(/'/g, "\\'")}')">
+                <img src="${getLogoUrl(tool.link)}" alt="" class="suggestion-logo" onerror="this.style.display='none'">
+                <span>${tool.name}</span>
             </div>`;
         });
     }
@@ -147,25 +157,39 @@ function searchAI() {
         return;
     }
 
-    resultsDiv.innerHTML = `<p class="results-count">Found ${filtered.length} AI tool${filtered.length !== 1 ? 's' : ''}</p>`;
+    resultsDiv.innerHTML = `
+        <div class="results-header">
+            <p class="results-count">Found ${filtered.length} AI tool${filtered.length !== 1 ? 's' : ''}</p>
+        </div>
+        <div class="results-grid">
+    `;
 
     filtered.forEach(item => {
         const tool = item.tool;
-        const reasonsHtml = item.matchReasons.length > 0 
-            ? `<p class="match-reason">Matched: ${item.matchReasons.join(', ')}</p>` 
-            : '';
-
+        const logoUrl = getLogoUrl(tool.link);
+        
         resultsDiv.innerHTML += `
             <div class="card result-card">
-                <h3>${tool.name}</h3>
-                <p>${tool.description}</p>
-                ${reasonsHtml}
-                <button onclick="window.open('${tool.link}', '_blank')">
-                    Open AI
-                </button>
+                <div class="card-header">
+                    <img src="${logoUrl}" alt="${tool.name}" class="tool-logo" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>'">
+                    <div class="tool-title">
+                        <h3>${tool.name}</h3>
+                        <a href="${tool.link}" target="_blank" class="tool-link">Visit Website →</a>
+                    </div>
+                </div>
+                <p class="tool-description">${tool.description}</p>
+                <div class="best-for">
+                    <span class="best-for-label">⭐ Best For:</span>
+                    <span class="best-for-text">${tool.bestFor}</span>
+                </div>
+                <div class="match-tags">
+                    ${item.matchReasons.map(r => `<span class="tag">${r}</span>`).join('')}
+                </div>
             </div>
         `;
     });
+
+    resultsDiv.innerHTML += '</div>';
 
     resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
