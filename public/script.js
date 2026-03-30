@@ -9,6 +9,9 @@ const allKeywords = [...new Set(
     ].flat())
 )].filter(k => k.length > 2);
 
+const allToolNames = aiTools.map(tool => tool.name);
+const allDescriptions = aiTools.map(tool => tool.description);
+
 const newsData = [
     {
         id: 1,
@@ -352,92 +355,21 @@ Market analysts predict this momentum will continue through 2026, with total ann
 
 let newsHistory = [];
 let historyIndex = -1;
+let isSearchActive = false;
 
 const trendingTools = [
-    {
-        name: "ChatGPT",
-        description: "Advanced AI chatbot for conversation, coding, writing",
-        link: "https://chat.openai.com",
-        icon: "🤖",
-        userCount: "100M+ users"
-    },
-    {
-        name: "Claude",
-        description: "AI assistant for reasoning, analysis & writing",
-        link: "https://claude.ai",
-        icon: "🧠",
-        userCount: "50M+ users"
-    },
-    {
-        name: "Gemini",
-        description: "Google's multimodal AI for text, images, video",
-        link: "https://gemini.google.com",
-        icon: "✨",
-        userCount: "80M+ users"
-    },
-    {
-        name: "Midjourney",
-        description: "AI image generation for stunning artwork",
-        link: "https://www.midjourney.com",
-        icon: "🎨",
-        userCount: "25M+ users"
-    },
-    {
-        name: "Runway",
-        description: "AI-powered video editing & generation",
-        link: "https://runwayml.com",
-        icon: "🎬",
-        userCount: "15M+ users"
-    },
-    {
-        name: "Sora",
-        description: "Text-to-video AI by OpenAI",
-        link: "https://openai.com/sora",
-        icon: "🎥",
-        userCount: "10M+ users"
-    },
-    {
-        name: "Cursor",
-        description: "AI-first code editor for developers",
-        link: "https://cursor.com",
-        icon: "💻",
-        userCount: "8M+ users"
-    },
-    {
-        name: "GitHub Copilot",
-        description: "AI pair programmer by GitHub",
-        link: "https://github.com/features/copilot",
-        icon: "⚡",
-        userCount: "20M+ users"
-    },
-    {
-        name: "Perplexity",
-        description: "AI-powered search engine with answers",
-        link: "https://perplexity.ai",
-        icon: "🔍",
-        userCount: "30M+ users"
-    },
-    {
-        name: "Suno",
-        description: "AI music generation with vocals",
-        link: "https://suno.ai",
-        icon: "🎵",
-        userCount: "12M+ users"
-    },
-    {
-        name: "DALL-E",
-        description: "AI image generation by OpenAI",
-        link: "https://openai.com/dall-e-3",
-        icon: "🖼️",
-        userCount: "18M+ users"
-    },
-    {
-        name: "ElevenLabs",
-        description: "AI voice synthesis & voice cloning",
-        link: "https://elevenlabs.io",
-        icon: "🎙️",
-        userCount: "6M+ users"
-    }
+    { name: "ChatGPT", description: "Advanced AI chatbot for conversation, coding, writing", link: "https://chat.openai.com", icon: "🤖", userCount: "100M+ users" },
+    { name: "Claude", description: "AI assistant for reasoning, analysis & writing", link: "https://claude.ai", icon: "🧠", userCount: "50M+ users" },
+    { name: "Gemini", description: "Google's multimodal AI for text, images, video", link: "https://gemini.google.com", icon: "✨", userCount: "80M+ users" },
+    { name: "Midjourney", description: "AI image generation for stunning artwork", link: "https://www.midjourney.com", icon: "🎨", userCount: "25M+ users" },
+    { name: "Runway", description: "AI-powered video editing & generation", link: "https://runwayml.com", icon: "🎬", userCount: "15M+ users" },
+    { name: "Sora", description: "Text-to-video AI by OpenAI", link: "https://openai.com/sora", icon: "🎥", userCount: "10M+ users" },
+    { name: "Cursor", description: "AI-first code editor for developers", link: "https://cursor.com", icon: "💻", userCount: "8M+ users" },
+    { name: "GitHub Copilot", description: "AI pair programmer by GitHub", link: "https://github.com/features/copilot", icon: "⚡", userCount: "20M+ users" },
+    { name: "Perplexity", description: "AI-powered search engine with answers", link: "https://perplexity.ai", icon: "🔍", userCount: "30M+ users" },
+    { name: "Suno", description: "AI music generation with vocals", link: "https://suno.ai", icon: "🎵", userCount: "12M+ users" },
+    { name: "DALL-E", description: "AI image generation by OpenAI", link: "https://openai.com/dall-e-3", icon: "🖼️", userCount: "18M+ users" },
+    { name: "ElevenLabs", description: "AI voice synthesis & voice cloning", link: "https://elevenlabs.io", icon: "🎙️", userCount: "6M+ users" }
 ];
 
 function getToolLogoUrl(link) {
@@ -445,19 +377,16 @@ function getToolLogoUrl(link) {
         const url = new URL(link);
         const domain = url.hostname.replace('www.', '');
         return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-    } catch {
-        return '';
-    }
+    } catch { return ''; }
 }
 
 function renderTrendingTools() {
     const carousel = document.getElementById('trendingCarousel');
     if (!carousel) return;
-    
     carousel.innerHTML = trendingTools.map(tool => `
         <a href="${tool.link}" target="_blank" class="trending-tool-card">
             <div class="trending-tool-logo">
-                <img src="${getToolLogoUrl(tool.link)}" alt="${tool.name}" onerror="this.parentElement.innerHTML='<span class='trending-tool-icon'>${tool.icon}</span>'">
+                <img src="${getToolLogoUrl(tool.link)}" alt="${tool.name}" onerror="this.parentElement.innerHTML='<span class=\\'trending-tool-icon\\'>${tool.icon}</span>'">
             </div>
             <div class="trending-tool-info">
                 <h3>${tool.name}</h3>
@@ -468,10 +397,14 @@ function renderTrendingTools() {
     `).join('');
 }
 
+function getTypeEmoji(type) {
+    const emojis = { 'breaking': '🔥', 'trending': '📈', 'must-read': '⚡', 'analysis': '🎯', 'guide': '💡', 'new': '🚀' };
+    return emojis[type] || '📰';
+}
+
 function renderNewsCards() {
     const carousel = document.getElementById('newsCarousel');
     if (!carousel) return;
-    
     carousel.innerHTML = newsData.map(news => `
         <div class="news-card ${news.type}" onclick="openNewsModal(${news.id})">
             <div class="news-badge-top">${getTypeEmoji(news.type)} ${news.type.replace('-', ' ').toUpperCase()}</div>
@@ -488,216 +421,87 @@ function renderNewsCards() {
     `).join('');
 }
 
-function getTypeEmoji(type) {
-    const emojis = {
-        'breaking': '🔥',
-        'trending': '📈',
-        'must-read': '⚡',
-        'analysis': '🎯',
-        'guide': '💡',
-        'new': '🚀'
-    };
-    return emojis[type] || '📰';
-}
-
-function openNewsModal(newsId, addToHistory = true) {
-    const news = newsData.find(n => n.id === newsId);
-    if (!news) return;
-    
-    if (addToHistory) {
-        if (historyIndex < newsHistory.length - 1) {
-            newsHistory = newsHistory.slice(0, historyIndex + 1);
-        }
-        newsHistory.push(newsId);
-        historyIndex = newsHistory.length - 1;
+function showSuggestions(query) {
+    const suggestionsDiv = document.getElementById("suggestions");
+    if (query.length < 1) {
+        suggestionsDiv.innerHTML = "";
+        suggestionsDiv.style.display = "none";
+        return;
     }
-    
-    const modal = document.getElementById('newsModal');
-    const modalBody = document.getElementById('newsModalBody');
-    
-    const relatedNews = newsData
-        .filter(n => n.id !== newsId && (
-            n.category === news.category || 
-            n.tags.some(tag => news.tags.includes(tag))
-        ))
-        .slice(0, 4);
-    
-    modalBody.innerHTML = `
-        <div class="modal-article">
-            <div class="modal-header-bar">
-                <button class="modal-back-btn" onclick="goBackInHistory()" ${historyIndex <= 0 ? 'disabled' : ''}>
-                    ← Back
-                </button>
-                <span class="modal-history-count">
-                    ${historyIndex + 1} of ${newsHistory.length}
-                </span>
-            </div>
-            
-            <div class="modal-header">
-                <span class="modal-category ${news.type}">${getTypeEmoji(news.type)} ${news.category}</span>
-                <span class="modal-date">${news.publishDate}</span>
-            </div>
-            
-            <h1 class="modal-headline">${news.headline}</h1>
-            
-            <div class="modal-meta">
-                <span class="modal-author">By ${news.author}</span>
-                <span class="modal-readtime">${news.readTime}</span>
-                <span class="modal-time">${news.timeAgo}</span>
-            </div>
-            
-            <div class="modal-tags">
-                ${news.tags.map(tag => `<span class="modal-tag">${tag}</span>`).join('')}
-            </div>
-            
-            <div class="modal-body">
-                ${news.fullContent.split('\n\n').map(para => {
-                    if (para.startsWith('•')) {
-                        return `<ul>${para.split('\n').map(item => `<li>${item.replace('• ', '')}</li>`).join('')}</ul>`;
-                    } else if (para.startsWith('**')) {
-                        return `<h3>${para.replace(/\*\*/g, '')}</h3>`;
-                    }
-                    return `<p>${para}</p>`;
-                }).join('')}
-            </div>
-            
-            <div class="modal-source-section">
-                <a href="${news.externalLink}" target="_blank" class="modal-source-link">
-                    📖 Read Full Article on ${news.sourceName} →
-                </a>
-            </div>
-            
-            ${relatedNews.length > 0 ? `
-                <div class="modal-related">
-                    <h2 class="related-title">📰 Related News</h2>
-                    <div class="related-grid">
-                        ${relatedNews.map(r => `
-                            <div class="related-card ${r.type}" onclick="openNewsModal(${r.id})">
-                                <span class="related-badge">${getTypeEmoji(r.type)} ${r.type.replace('-', ' ')}</span>
-                                <h4>${r.headline}</h4>
-                                <div class="related-meta">
-                                    <span>${r.category}</span>
-                                    <span>${r.timeAgo}</span>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            ` : ''}
-        </div>
-    `;
-    
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
 
-function goBackInHistory() {
-    if (historyIndex > 0) {
-        historyIndex--;
-        const prevNewsId = newsHistory[historyIndex];
-        const news = newsData.find(n => n.id === prevNewsId);
-        if (news) {
-            updateModalContent(prevNewsId);
-        }
+    const queryLower = query.toLowerCase();
+    
+    const toolMatches = aiTools.filter(tool => 
+        tool.name.toLowerCase().includes(queryLower) || 
+        tool.description.toLowerCase().includes(queryLower)
+    ).slice(0, 5);
+
+    const keywordMatches = allKeywords.filter(k => k.toLowerCase().includes(queryLower)).slice(0, 8);
+    
+    const popularSearches = getPopularSearches(queryLower);
+
+    if (toolMatches.length === 0 && keywordMatches.length === 0 && popularSearches.length === 0) {
+        suggestionsDiv.style.display = "none";
+        return;
     }
-}
 
-function updateModalContent(newsId) {
-    const news = newsData.find(n => n.id === newsId);
-    if (!news) return;
-    
-    const modalBody = document.getElementById('newsModalBody');
-    
-    const relatedNews = newsData
-        .filter(n => n.id !== newsId && (
-            n.category === news.category || 
-            n.tags.some(tag => news.tags.includes(tag))
-        ))
-        .slice(0, 4);
-    
-    modalBody.innerHTML = `
-        <div class="modal-article">
-            <div class="modal-header-bar">
-                <button class="modal-back-btn" onclick="goBackInHistory()" ${historyIndex <= 0 ? 'disabled' : ''}>
-                    ← Back
-                </button>
-                <span class="modal-history-count">
-                    ${historyIndex + 1} of ${newsHistory.length}
-                </span>
-            </div>
-            
-            <div class="modal-header">
-                <span class="modal-category ${news.type}">${getTypeEmoji(news.type)} ${news.category}</span>
-                <span class="modal-date">${news.publishDate}</span>
-            </div>
-            
-            <h1 class="modal-headline">${news.headline}</h1>
-            
-            <div class="modal-meta">
-                <span class="modal-author">By ${news.author}</span>
-                <span class="modal-readtime">${news.readTime}</span>
-                <span class="modal-time">${news.timeAgo}</span>
-            </div>
-            
-            <div class="modal-tags">
-                ${news.tags.map(tag => `<span class="modal-tag">${tag}</span>`).join('')}
-            </div>
-            
-            <div class="modal-body">
-                ${news.fullContent.split('\n\n').map(para => {
-                    if (para.startsWith('•')) {
-                        return `<ul>${para.split('\n').map(item => `<li>${item.replace('• ', '')}</li>`).join('')}</ul>`;
-                    } else if (para.startsWith('**')) {
-                        return `<h3>${para.replace(/\*\*/g, '')}</h3>`;
-                    }
-                    return `<p>${para}</p>`;
-                }).join('')}
-            </div>
-            
-            <div class="modal-source-section">
-                <a href="${news.externalLink}" target="_blank" class="modal-source-link">
-                    📖 Read Full Article on ${news.sourceName} →
-                </a>
-            </div>
-            
-            ${relatedNews.length > 0 ? `
-                <div class="modal-related">
-                    <h2 class="related-title">📰 Related News</h2>
-                    <div class="related-grid">
-                        ${relatedNews.map(r => `
-                            <div class="related-card ${r.type}" onclick="openNewsModal(${r.id})">
-                                <span class="related-badge">${getTypeEmoji(r.type)} ${r.type.replace('-', ' ')}</span>
-                                <h4>${r.headline}</h4>
-                                <div class="related-meta">
-                                    <span>${r.category}</span>
-                                    <span>${r.timeAgo}</span>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            ` : ''}
-        </div>
-    `;
-}
+    let html = "";
 
-function closeNewsModal() {
-    const modal = document.getElementById('newsModal');
-    modal.classList.remove('active');
-    document.body.style.overflow = 'auto';
-    newsHistory = [];
-    historyIndex = -1;
-}
-
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        closeNewsModal();
+    if (popularSearches.length > 0) {
+        html += '<div class="suggestion-section">🔥 Popular Searches</div>';
+        popularSearches.forEach(term => {
+            html += `<div class="suggestion-item" onclick="selectSuggestion('${term.replace(/'/g, "\\'")}')">
+                <span class="suggestion-icon">🔥</span> ${term}
+            </div>`;
+        });
     }
-});
 
-window.openNewsModal = openNewsModal;
-window.closeNewsModal = closeNewsModal;
-window.goBackInHistory = goBackInHistory;
+    if (toolMatches.length > 0) {
+        html += '<div class="suggestion-section">🤖 AI Tools</div>';
+        toolMatches.forEach(tool => {
+            html += `<div class="suggestion-item" onclick="selectSuggestion('${tool.name.replace(/'/g, "\\'")}')">
+                <img src="${getToolLogoUrl(tool.link)}" alt="" class="suggestion-logo" onerror="this.style.display='none'">
+                <span>${tool.name}</span>
+                <span class="suggestion-category">${tool.tags[0]}</span>
+            </div>`;
+        });
+    }
+
+    if (keywordMatches.length > 0) {
+        html += '<div class="suggestion-section">🔍 Related Keywords</div>';
+        keywordMatches.forEach(match => {
+            html += `<div class="suggestion-item" onclick="selectSuggestion('${match}')">
+                <span class="suggestion-icon">🔍</span> ${match}
+            </div>`;
+        });
+    }
+
+    suggestionsDiv.innerHTML = html;
+    suggestionsDiv.style.display = "block";
+}
+
+function getPopularSearches(query) {
+    const popularTerms = [
+        "best AI for video editing",
+        "free AI image generator",
+        "AI coding assistant",
+        "text to video AI",
+        "AI chatbot for writing",
+        "music generation AI",
+        "AI presentation maker",
+        "voice cloning AI",
+        "AI logo generator",
+        "AI for research papers"
+    ];
+    return popularTerms.filter(term => term.toLowerCase().includes(query)).slice(0, 3);
+}
+
+function selectSuggestion(value) {
+    document.getElementById("searchInput").value = value;
+    document.getElementById("suggestions").innerHTML = "";
+    document.getElementById("suggestions").style.display = "none";
+    searchAI();
+}
 
 function extractKeywords(query) {
     return query.toLowerCase()
@@ -708,7 +512,6 @@ function extractKeywords(query) {
 
 function calculateScore(tool, keywords) {
     if (keywords.length === 0) return 0;
-    
     let score = 0;
     const toolName = tool.name.toLowerCase();
     const toolDesc = tool.description.toLowerCase();
@@ -716,12 +519,9 @@ function calculateScore(tool, keywords) {
 
     keywords.forEach(keyword => {
         if (toolName.includes(keyword)) score += 10;
-        toolTags.forEach(tag => {
-            if (tag.includes(keyword)) score += 5;
-        });
+        toolTags.forEach(tag => { if (tag.includes(keyword)) score += 5; });
         if (toolDesc.includes(keyword)) score += 3;
     });
-
     return score;
 }
 
@@ -731,16 +531,9 @@ function getMatchReasons(tool, keywords) {
     const toolTags = tool.tags.map(tag => tag.toLowerCase());
 
     keywords.forEach(keyword => {
-        if (toolName.includes(keyword)) {
-            reasons.push(tool.name);
-        }
-        toolTags.forEach(tag => {
-            if (tag.includes(keyword) && !reasons.includes(tag)) {
-                reasons.push(tag);
-            }
-        });
+        if (toolName.includes(keyword)) reasons.push(tool.name);
+        toolTags.forEach(tag => { if (tag.includes(keyword) && !reasons.includes(tag)) reasons.push(tag); });
     });
-
     return [...new Set(reasons)].slice(0, 3);
 }
 
@@ -754,76 +547,43 @@ function getLogoUrl(link) {
     }
 }
 
-function showSuggestions(query) {
-    const suggestionsDiv = document.getElementById("suggestions");
-    const input = document.getElementById("searchInput");
+function showOriginalContent() {
+    const trendingSection = document.getElementById('trendingTools');
+    const newsSection = document.getElementById('latestNews');
+    const videosSection = document.querySelector('.videos');
     
-    if (query.length < 1) {
-        suggestionsDiv.innerHTML = "";
-        suggestionsDiv.style.display = "none";
-        return;
-    }
-
-    const queryLower = query.toLowerCase();
-    const matches = allKeywords.filter(k => k.toLowerCase().includes(queryLower));
-    
-    const toolMatches = aiTools.filter(tool => 
-        tool.name.toLowerCase().includes(queryLower)
-    ).slice(0, 3);
-
-    if (matches.length === 0 && toolMatches.length === 0) {
-        suggestionsDiv.style.display = "none";
-        return;
-    }
-
-    let html = "";
-
-    if (toolMatches.length > 0) {
-        html += '<div class="suggestion-section">Tools</div>';
-        toolMatches.forEach(tool => {
-            html += `<div class="suggestion-item" onclick="selectSuggestion('${tool.name.replace(/'/g, "\\'")}')">
-                <img src="${getLogoUrl(tool.link)}" alt="" class="suggestion-logo" onerror="this.style.display='none'">
-                <span>${tool.name}</span>
-            </div>`;
-        });
-    }
-
-    const uniqueMatches = [...new Set(matches)].slice(0, 8);
-    if (uniqueMatches.length > 0) {
-        html += '<div class="suggestion-section">Keywords</div>';
-        uniqueMatches.forEach(match => {
-            html += `<div class="suggestion-item" onclick="selectSuggestion('${match}')">
-                <span class="suggestion-icon">🔍</span> ${match}
-            </div>`;
-        });
-    }
-
-    suggestionsDiv.innerHTML = html;
-    suggestionsDiv.style.display = "block";
+    trendingSection.style.display = 'block';
+    newsSection.style.display = 'block';
+    videosSection.style.display = 'block';
+    isSearchActive = false;
 }
 
-function selectSuggestion(value) {
-    document.getElementById("searchInput").value = value;
-    document.getElementById("suggestions").innerHTML = "";
-    document.getElementById("suggestions").style.display = "none";
-    searchAI();
+function hideOriginalContent() {
+    const trendingSection = document.getElementById('trendingTools');
+    const newsSection = document.getElementById('latestNews');
+    const videosSection = document.querySelector('.videos');
+    
+    trendingSection.style.display = 'none';
+    newsSection.style.display = 'none';
+    videosSection.style.display = 'none';
+    isSearchActive = true;
 }
-
-window.selectSuggestion = selectSuggestion;
 
 function searchAI() {
-    const query = document.getElementById("searchInput").value.toLowerCase().trim();
+    const query = document.getElementById("searchInput").value.trim();
     const resultsDiv = document.getElementById("results");
+    const suggestionsDiv = document.getElementById("suggestions");
 
-    document.getElementById("suggestions").innerHTML = "";
-    document.getElementById("suggestions").style.display = "none";
-
-    resultsDiv.innerHTML = "";
+    suggestionsDiv.innerHTML = "";
+    suggestionsDiv.style.display = "none";
 
     if (!query) {
-        resultsDiv.innerHTML = '<p class="no-results">Please enter a search term</p>';
+        resultsDiv.innerHTML = '';
+        showOriginalContent();
         return;
     }
+
+    hideOriginalContent();
 
     const keywords = extractKeywords(query);
     
@@ -838,18 +598,18 @@ function searchAI() {
         matchReasons: getMatchReasons(tool, keywords)
     }));
 
-    const filtered = scored
-        .filter(item => item.score > 0)
-        .sort((a, b) => b.score - a.score);
+    const filtered = scored.filter(item => item.score > 0).sort((a, b) => b.score - a.score);
 
     if (filtered.length === 0) {
-        resultsDiv.innerHTML = `<p class="no-results">No AI tools found for "${query}"</p>`;
+        resultsDiv.innerHTML = `<p class="no-results">No AI tools found for "${query}"</p>
+            <button class="clear-search-btn" onclick="clearSearch()">← Back to Home</button>`;
         return;
     }
 
     resultsDiv.innerHTML = `
         <div class="results-header">
-            <p class="results-count">Found ${filtered.length} AI tool${filtered.length !== 1 ? 's' : ''}</p>
+            <p class="results-count">Found ${filtered.length} AI tool${filtered.length !== 1 ? 's' : ''} for "${query}"</p>
+            <button class="clear-search-btn" onclick="clearSearch()">← Back to Home</button>
         </div>
         <div class="results-grid">
     `;
@@ -880,9 +640,151 @@ function searchAI() {
     });
 
     resultsDiv.innerHTML += '</div>';
-
     resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
+function clearSearch() {
+    document.getElementById("searchInput").value = '';
+    document.getElementById("results").innerHTML = '';
+    showOriginalContent();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function openNewsModal(newsId, addToHistory = true) {
+    const news = newsData.find(n => n.id === newsId);
+    if (!news) return;
+    
+    if (addToHistory) {
+        if (historyIndex < newsHistory.length - 1) newsHistory = newsHistory.slice(0, historyIndex + 1);
+        newsHistory.push(newsId);
+        historyIndex = newsHistory.length - 1;
+    }
+    
+    const modal = document.getElementById('newsModal');
+    const modalBody = document.getElementById('newsModalBody');
+    
+    const relatedNews = newsData.filter(n => n.id !== newsId && (n.category === news.category || n.tags.some(tag => news.tags.includes(tag)))).slice(0, 4);
+    
+    modalBody.innerHTML = `
+        <div class="modal-article">
+            <div class="modal-header-bar">
+                <button class="modal-back-btn" onclick="goBackInHistory()" ${historyIndex <= 0 ? 'disabled' : ''}>← Back</button>
+                <span class="modal-history-count">${historyIndex + 1} of ${newsHistory.length}</span>
+            </div>
+            <div class="modal-header">
+                <span class="modal-category ${news.type}">${getTypeEmoji(news.type)} ${news.category}</span>
+                <span class="modal-date">${news.publishDate}</span>
+            </div>
+            <h1 class="modal-headline">${news.headline}</h1>
+            <div class="modal-meta">
+                <span class="modal-author">By ${news.author}</span>
+                <span class="modal-readtime">${news.readTime}</span>
+                <span class="modal-time">${news.timeAgo}</span>
+            </div>
+            <div class="modal-tags">${news.tags.map(tag => `<span class="modal-tag">${tag}</span>`).join('')}</div>
+            <div class="modal-body">${news.fullContent.split('\n\n').map(para => {
+                if (para.startsWith('•')) return `<ul>${para.split('\n').map(item => `<li>${item.replace('• ', '')}</li>`).join('')}</ul>`;
+                else if (para.startsWith('**')) return `<h3>${para.replace(/\*\*/g, '')}</h3>`;
+                return `<p>${para}</p>`;
+            }).join('')}</div>
+            <div class="modal-source-section">
+                <a href="${news.externalLink}" target="_blank" class="modal-source-link">📖 Read Full Article on ${news.sourceName} →</a>
+            </div>
+            ${relatedNews.length > 0 ? `
+                <div class="modal-related">
+                    <h2 class="related-title">📰 Related News</h2>
+                    <div class="related-grid">${relatedNews.map(r => `
+                        <div class="related-card ${r.type}" onclick="openNewsModal(${r.id})">
+                            <span class="related-badge">${getTypeEmoji(r.type)} ${r.type.replace('-', ' ')}</span>
+                            <h4>${r.headline}</h4>
+                            <div class="related-meta"><span>${r.category}</span><span>${r.timeAgo}</span></div>
+                        </div>
+                    `).join('')}</div>
+                </div>
+            ` : ''}
+        </div>
+    `;
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function goBackInHistory() {
+    if (historyIndex > 0) {
+        historyIndex--;
+        const prevNewsId = newsHistory[historyIndex];
+        const news = newsData.find(n => n.id === prevNewsId);
+        if (news) {
+            updateModalContent(prevNewsId);
+        }
+    }
+}
+
+function updateModalContent(newsId) {
+    const news = newsData.find(n => n.id === newsId);
+    if (!news) return;
+    
+    const modalBody = document.getElementById('newsModalBody');
+    const relatedNews = newsData.filter(n => n.id !== newsId && (n.category === news.category || n.tags.some(tag => news.tags.includes(tag)))).slice(0, 4);
+    
+    modalBody.innerHTML = `
+        <div class="modal-article">
+            <div class="modal-header-bar">
+                <button class="modal-back-btn" onclick="goBackInHistory()" ${historyIndex <= 0 ? 'disabled' : ''}>← Back</button>
+                <span class="modal-history-count">${historyIndex + 1} of ${newsHistory.length}</span>
+            </div>
+            <div class="modal-header">
+                <span class="modal-category ${news.type}">${getTypeEmoji(news.type)} ${news.category}</span>
+                <span class="modal-date">${news.publishDate}</span>
+            </div>
+            <h1 class="modal-headline">${news.headline}</h1>
+            <div class="modal-meta">
+                <span class="modal-author">By ${news.author}</span>
+                <span class="modal-readtime">${news.readTime}</span>
+                <span class="modal-time">${news.timeAgo}</span>
+            </div>
+            <div class="modal-tags">${news.tags.map(tag => `<span class="modal-tag">${tag}</span>`).join('')}</div>
+            <div class="modal-body">${news.fullContent.split('\n\n').map(para => {
+                if (para.startsWith('•')) return `<ul>${para.split('\n').map(item => `<li>${item.replace('• ', '')}</li>`).join('')}</ul>`;
+                else if (para.startsWith('**')) return `<h3>${para.replace(/\*\*/g, '')}</h3>`;
+                return `<p>${para}</p>`;
+            }).join('')}</div>
+            <div class="modal-source-section">
+                <a href="${news.externalLink}" target="_blank" class="modal-source-link">📖 Read Full Article on ${news.sourceName} →</a>
+            </div>
+            ${relatedNews.length > 0 ? `
+                <div class="modal-related">
+                    <h2 class="related-title">📰 Related News</h2>
+                    <div class="related-grid">${relatedNews.map(r => `
+                        <div class="related-card ${r.type}" onclick="openNewsModal(${r.id})">
+                            <span class="related-badge">${getTypeEmoji(r.type)} ${r.type.replace('-', ' ')}</span>
+                            <h4>${r.headline}</h4>
+                            <div class="related-meta"><span>${r.category}</span><span>${r.timeAgo}</span></div>
+                        </div>
+                    `).join('')}</div>
+                </div>
+            ` : ''}
+        </div>
+    `;
+}
+
+function closeNewsModal() {
+    const modal = document.getElementById('newsModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+    newsHistory = [];
+    historyIndex = -1;
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeNewsModal();
+});
+
+window.selectSuggestion = selectSuggestion;
+window.clearSearch = clearSearch;
+window.searchAI = searchAI;
+window.openNewsModal = openNewsModal;
+window.closeNewsModal = closeNewsModal;
+window.goBackInHistory = goBackInHistory;
 
 document.addEventListener('DOMContentLoaded', () => {
     renderTrendingTools();
@@ -892,25 +794,21 @@ document.addEventListener('DOMContentLoaded', () => {
     
     searchInput.addEventListener('input', (e) => {
         showSuggestions(e.target.value);
+        if (e.target.value.trim() === '') {
+            document.getElementById("results").innerHTML = '';
+            showOriginalContent();
+        }
     });
 
     searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            searchAI();
-        }
+        if (e.key === 'Enter') searchAI();
     });
 
     searchInput.addEventListener('blur', () => {
-        setTimeout(() => {
-            document.getElementById("suggestions").style.display = "none";
-        }, 200);
+        setTimeout(() => { document.getElementById("suggestions").style.display = "none"; }, 200);
     });
 
     searchInput.addEventListener('focus', () => {
-        if (searchInput.value.length > 0) {
-            showSuggestions(searchInput.value);
-        }
+        if (searchInput.value.length > 0) showSuggestions(searchInput.value);
     });
 });
-
-window.searchAI = searchAI;
