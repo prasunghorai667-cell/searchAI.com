@@ -2,6 +2,13 @@ import { aiTools } from "./data.js";
 
 const stopWords = ["the", "best", "for", "is", "which", "a", "an", "and", "or", "ai", "can", "i", "you", "what", "how", "to", "with", "my", "make", "create", "use"];
 
+const allKeywords = [...new Set(
+    aiTools.flatMap(tool => [
+        ...tool.tags,
+        tool.name.split(" ").filter(w => w.length > 2)
+    ].flat())
+)].filter(k => k.length > 2);
+
 function extractKeywords(query) {
     return query.toLowerCase()
         .replace(/[^\w\s]/g, "")
@@ -48,9 +55,68 @@ function getMatchReasons(tool, keywords) {
     return [...new Set(reasons)].slice(0, 3);
 }
 
+function showSuggestions(query) {
+    const suggestionsDiv = document.getElementById("suggestions");
+    const input = document.getElementById("searchInput");
+    
+    if (query.length < 1) {
+        suggestionsDiv.innerHTML = "";
+        suggestionsDiv.style.display = "none";
+        return;
+    }
+
+    const queryLower = query.toLowerCase();
+    const matches = allKeywords.filter(k => k.toLowerCase().includes(queryLower));
+    
+    const toolMatches = aiTools.filter(tool => 
+        tool.name.toLowerCase().includes(queryLower)
+    ).slice(0, 3);
+
+    if (matches.length === 0 && toolMatches.length === 0) {
+        suggestionsDiv.style.display = "none";
+        return;
+    }
+
+    let html = "";
+
+    if (toolMatches.length > 0) {
+        html += '<div class="suggestion-section">Tools</div>';
+        toolMatches.forEach(tool => {
+            html += `<div class="suggestion-item" onclick="selectSuggestion('${tool.name}')">
+                <span class="suggestion-icon">🤖</span> ${tool.name}
+            </div>`;
+        });
+    }
+
+    const uniqueMatches = [...new Set(matches)].slice(0, 8);
+    if (uniqueMatches.length > 0) {
+        html += '<div class="suggestion-section">Keywords</div>';
+        uniqueMatches.forEach(match => {
+            html += `<div class="suggestion-item" onclick="selectSuggestion('${match}')">
+                <span class="suggestion-icon">🔍</span> ${match}
+            </div>`;
+        });
+    }
+
+    suggestionsDiv.innerHTML = html;
+    suggestionsDiv.style.display = "block";
+}
+
+function selectSuggestion(value) {
+    document.getElementById("searchInput").value = value;
+    document.getElementById("suggestions").innerHTML = "";
+    document.getElementById("suggestions").style.display = "none";
+    searchAI();
+}
+
+window.selectSuggestion = selectSuggestion;
+
 function searchAI() {
     const query = document.getElementById("searchInput").value.toLowerCase().trim();
     const resultsDiv = document.getElementById("results");
+
+    document.getElementById("suggestions").innerHTML = "";
+    document.getElementById("suggestions").style.display = "none";
 
     resultsDiv.innerHTML = "";
 
@@ -100,13 +166,32 @@ function searchAI() {
             </div>
         `;
     });
+
+    resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('searchInput');
+    
+    searchInput.addEventListener('input', (e) => {
+        showSuggestions(e.target.value);
+    });
+
     searchInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             searchAI();
+        }
+    });
+
+    searchInput.addEventListener('blur', () => {
+        setTimeout(() => {
+            document.getElementById("suggestions").style.display = "none";
+        }, 200);
+    });
+
+    searchInput.addEventListener('focus', () => {
+        if (searchInput.value.length > 0) {
+            showSuggestions(searchInput.value);
         }
     });
 });

@@ -9,7 +9,10 @@
 <header>
     <h1>🔍 searchAI</h1>
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Search AI tools (e.g., 'best AI for video editing')...">
+        <div class="search-wrapper">
+            <input type="text" id="searchInput" placeholder="Search AI tools (e.g., 'best AI for video editing')..." autocomplete="off">
+            <div id="suggestions" class="suggestions"></div>
+        </div>
         <button onclick="searchAI()">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="8"></circle>
@@ -19,6 +22,8 @@
     </div>
     <p class="search-hint">Try: "video editing", "coding assistant", "image generation"</p>
 </header>
+
+<section id="results"></section>
 
 <section class="news">
     <h2>📰 Latest AI News</h2>
@@ -46,8 +51,6 @@
         allowfullscreen>
     </iframe>
 </section>
-
-<section id="results"></section>
 
 <script type="module" src="script.js"></script>
 

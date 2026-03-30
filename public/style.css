@@ -9,6 +9,9 @@ header {
     background: #1e293b;
     padding: 20px;
     text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 h1 {
@@ -19,6 +22,10 @@ h1 {
     display: flex;
     justify-content: center;
     gap: 0;
+}
+
+.search-wrapper {
+    position: relative;
 }
 
 input {
@@ -54,6 +61,46 @@ button svg {
     margin-top: 10px;
 }
 
+.suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #1e293b;
+    border-radius: 0 0 8px 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+    z-index: 1000;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.suggestion-section {
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: #0f172a;
+}
+
+.suggestion-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s;
+}
+
+.suggestion-item:hover {
+    background: #334155;
+}
+
+.suggestion-icon {
+    font-size: 16px;
+}
+
 .news, .videos {
     padding: 20px;
 }
@@ -71,25 +118,29 @@ iframe {
 
 #results {
     padding: 20px;
+    min-height: 200px;
 }
 
 .results-count {
-    color: #94a3b8;
-    margin-bottom: 10px;
+    color: #22c55e;
+    margin-bottom: 15px;
+    font-weight: bold;
 }
 
 .no-results {
     text-align: center;
     color: #94a3b8;
-    padding: 20px;
+    padding: 40px;
+    font-size: 18px;
 }
 
 .result-card {
-    transition: transform 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .result-card:hover {
-    transform: translateX(5px);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
 }
 
 .match-reason {
@@ -102,4 +153,10 @@ iframe {
 .result-card button {
     padding: 8px 16px;
     border-radius: 6px;
+}
+
+@media (max-width: 500px) {
+    input {
+        width: 250px;
+    }
 }
