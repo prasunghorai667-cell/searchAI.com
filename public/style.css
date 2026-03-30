@@ -395,12 +395,20 @@ body {
 
 /* Header Styles */
 header {
-    position: relative;
-    z-index: 10;
-    background: linear-gradient(180deg, rgba(10, 6, 20, 0.95) 0%, rgba(10, 6, 20, 0.8) 100%);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: linear-gradient(180deg, rgba(10, 6, 20, 0.98) 0%, rgba(10, 6, 20, 0.95) 100%);
     backdrop-filter: blur(20px);
-    padding: 20px 20px 15px;
+    padding: 12px 20px 10px;
     border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.5);
+}
+
+body {
+    padding-top: 110px;
 }
 
 header::before {
@@ -429,62 +437,66 @@ header::before {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
 .home-btn {
     position: absolute;
-    left: 20px;
+    left: 15px;
     top: 50%;
     transform: translateY(-50%);
     display: flex;
     align-items: center;
-    gap: 8px;
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(157, 78, 221, 0.2));
-    border: 1px solid rgba(255, 215, 0, 0.3);
+    gap: 5px;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(157, 78, 221, 0.15));
+    border: 1px solid rgba(255, 215, 0, 0.25);
     color: #FFD700;
-    padding: 10px 18px;
-    border-radius: 25px;
+    padding: 6px 12px;
+    border-radius: 20px;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
     transition: all 0.3s ease;
 }
 
 .home-btn:hover {
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.4), rgba(157, 78, 221, 0.4));
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(157, 78, 221, 0.3));
     transform: translateY(-50%) scale(1.05);
-    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+    box-shadow: 0 3px 15px rgba(255, 215, 0, 0.2);
 }
 
 .home-icon {
-    font-size: 16px;
+    font-size: 14px;
+}
+
+.home-text {
+    display: inline;
 }
 
 .back-btn {
     position: absolute;
-    right: 20px;
+    right: 15px;
     top: 50%;
     transform: translateY(-50%);
     display: flex;
     align-items: center;
-    gap: 8px;
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(157, 78, 221, 0.2));
-    border: 1px solid rgba(255, 215, 0, 0.3);
+    gap: 5px;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(157, 78, 221, 0.15));
+    border: 1px solid rgba(255, 215, 0, 0.25);
     color: #FFD700;
-    padding: 10px 18px;
-    border-radius: 25px;
-    font-size: 14px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .back-btn:hover {
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.4), rgba(157, 78, 221, 0.4));
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(157, 78, 221, 0.3));
     transform: translateY(-50%) scale(1.05);
-    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+    box-shadow: 0 3px 15px rgba(255, 215, 0, 0.2);
 }
 
 header::before {
@@ -533,8 +545,64 @@ h1 {
     justify-content: center;
     position: relative;
     z-index: 20;
-    max-width: 650px;
+    max-width: 550px;
     margin: 0 auto;
+}
+
+.search-wrapper {
+    position: relative;
+    max-width: 500px;
+    width: 100%;
+}
+
+input {
+    width: 100%;
+    padding: 10px 45px 10px 18px;
+    border: 2px solid rgba(0, 255, 200, 0.3);
+    border-radius: 25px;
+    font-size: 14px;
+    background: rgba(10, 20, 40, 0.95);
+    color: white;
+    outline: none;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+    box-shadow: 
+        0 0 15px rgba(0, 255, 200, 0.1),
+        inset 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+input:focus {
+    border-color: #00ffc8;
+    box-shadow: 
+        0 0 25px rgba(0, 255, 200, 0.25),
+        0 0 50px rgba(0, 255, 200, 0.1),
+        inset 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+    font-style: italic;
+}
+
+.search-wrapper::after {
+    content: '⌕';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: rgba(0, 255, 200, 0.6);
+    pointer-events: none;
+}
+
+.search-hint {
+    font-size: 11px;
+    color: rgba(255, 215, 0, 0.5);
+    margin: 6px 0 0 0;
+    position: relative;
+    z-index: 20;
+    letter-spacing: 0.5px;
+    text-align: center;
 }
 
 .search-wrapper {
@@ -601,14 +669,14 @@ input::placeholder {
     right: 0;
     background: linear-gradient(180deg, rgba(26, 10, 46, 0.98), rgba(10, 6, 20, 0.98));
     backdrop-filter: blur(20px);
-    border-radius: 0 0 25px 25px;
-    max-height: 300px;
+    border-radius: 0 0 20px 20px;
+    max-height: 280px;
     overflow-y: auto;
     display: none;
     z-index: 1000;
     box-shadow: 
-        0 20px 50px rgba(0, 0, 0, 0.6),
-        0 0 30px rgba(255, 215, 0, 0.1);
+        0 15px 40px rgba(0, 0, 0, 0.6),
+        0 0 25px rgba(255, 215, 0, 0.1);
     border: 1px solid rgba(255, 215, 0, 0.2);
     border-top: none;
     margin-top: 5px;
@@ -1013,7 +1081,7 @@ iframe {
 .trending-tools {
     position: relative;
     z-index: 5;
-    padding: 0 30px 25px;
+    padding: 20px 30px 25px;
 }
 
 .trending-tools::before {
@@ -1454,24 +1522,49 @@ iframe {
 }
 
 @media (max-width: 768px) {
+    header {
+        padding: 10px 15px 8px;
+    }
+    
+    body {
+        padding-top: 95px;
+    }
+    
     .home-btn {
         position: static;
         transform: none;
-        padding: 8px 12px;
-        font-size: 12px;
+        padding: 5px 10px;
+        font-size: 11px;
+    }
+    
+    .home-text {
+        display: none;
     }
     
     .back-btn {
         position: static;
         transform: none;
-        padding: 8px 12px;
-        font-size: 12px;
+        padding: 5px 10px;
+        font-size: 11px;
     }
     
     .header-bar {
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-bottom: 15px;
+        flex-wrap: nowrap;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+    
+    .search-container {
+        max-width: 100%;
+    }
+    
+    input {
+        padding: 8px 40px 8px 15px;
+        font-size: 13px;
+    }
+    
+    .search-hint {
+        font-size: 10px;
     }
     
     #results {
