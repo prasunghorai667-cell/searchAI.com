@@ -10,27 +10,23 @@
     <div class="hex-grid"></div>
     <div class="shimmer"></div>
     
-    <!-- Energy Rings -->
     <div class="energy-ring energy-ring-1"></div>
     <div class="energy-ring energy-ring-2"></div>
     <div class="energy-ring energy-ring-3"></div>
     <div class="energy-ring energy-ring-4"></div>
     
-    <!-- Particle Explosions -->
     <div class="particle-explosion" style="top: 15%; left: 25%; animation-delay: 0s;"></div>
     <div class="particle-explosion" style="top: 45%; left: 75%; animation-delay: 1s;"></div>
     <div class="particle-explosion" style="top: 75%; left: 35%; animation-delay: 2s;"></div>
     <div class="particle-explosion" style="top: 25%; left: 85%; animation-delay: 0.5s;"></div>
     <div class="particle-explosion" style="top: 65%; left: 15%; animation-delay: 1.5s;"></div>
     
-    <!-- Floating Geometric Shapes -->
     <div class="geo-shape geo-hex" style="top: 10%; left: 8%; animation-delay: 0s;"></div>
     <div class="geo-shape geo-diamond" style="top: 30%; left: 88%; animation-delay: -3s;"></div>
     <div class="geo-shape geo-circle" style="top: 60%; left: 5%; animation-delay: -6s;"></div>
     <div class="geo-shape geo-hex" style="top: 80%; left: 75%; animation-delay: -9s;"></div>
     <div class="geo-shape geo-diamond" style="top: 15%; left: 55%; animation-delay: -12s;"></div>
     
-    <!-- Neural Nodes -->
     <div class="neural-node" style="width: 12px; height: 12px; top: 8%; left: 12%; animation-delay: 0s;"></div>
     <div class="neural-node" style="width: 15px; height: 15px; top: 18%; left: 78%; animation-delay: -1s;"></div>
     <div class="neural-node" style="width: 10px; height: 10px; top: 35%; left: 5%; animation-delay: -2s;"></div>
@@ -44,7 +40,6 @@
     <div class="neural-node" style="width: 8px; height: 8px; top: 92%; left: 35%; animation-delay: -10s;"></div>
     <div class="neural-node" style="width: 14px; height: 14px; top: 50%; left: 8%; animation-delay: -11s;"></div>
     
-    <!-- Neural Connections -->
     <div class="neural-connection" style="width: 180px; top: 12%; left: 15%; transform: rotate(15deg);"></div>
     <div class="neural-connection" style="width: 200px; top: 22%; left: 60%; transform: rotate(-12deg);"></div>
     <div class="neural-connection" style="width: 160px; top: 40%; left: 8%; transform: rotate(25deg);"></div>
@@ -53,7 +48,6 @@
     <div class="neural-connection" style="width: 190px; top: 85%; left: 65%; transform: rotate(-20deg);"></div>
     <div class="neural-connection" style="width: 150px; top: 48%; left: 35%; transform: rotate(10deg);"></div>
     
-    <!-- Floating Particles -->
     <div class="particle particle-gold" style="width: 6px; height: 6px; top: 15%; left: 20%; animation: float-particle 15s infinite ease-in-out;"></div>
     <div class="particle particle-purple" style="width: 8px; height: 8px; top: 25%; left: 70%; animation: float-particle 18s infinite ease-in-out; animation-delay: -2s;"></div>
     <div class="particle particle-cyan" style="width: 5px; height: 5px; top: 40%; left: 15%; animation: float-particle 20s infinite ease-in-out; animation-delay: -4s;"></div>
@@ -67,7 +61,6 @@
     <div class="particle particle-silver" style="width: 5px; height: 5px; top: 90%; left: 50%; animation: float-particle 16s infinite ease-in-out; animation-delay: -20s;"></div>
     <div class="particle particle-purple" style="width: 7px; height: 7px; top: 5%; left: 75%; animation: float-particle 23s infinite ease-in-out; animation-delay: -22s;"></div>
     
-    <!-- Shooting Stars -->
     <div class="shooting-star" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
     <div class="shooting-star" style="top: 50%; left: 60%; animation-delay: 2s;"></div>
     <div class="shooting-star" style="top: 70%; left: 30%; animation-delay: 4s;"></div>
@@ -86,19 +79,124 @@
 </header>
 
 <main>
-    <section id="results"></section>
-
-    <section class="news">
-        <h2>📰 Latest AI News</h2>
-        <div class="card">
-            <h3>OpenAI launches new GPT model</h3>
-            <p>New AI model improves reasoning and coding capabilities significantly.</p>
+    <!-- LATEST AI NEWS SECTION -->
+    <section class="latest-news" id="latestNews">
+        <div class="news-header">
+            <div class="news-title-wrapper">
+                <span class="live-indicator"></span>
+                <h2>🔥 Latest AI News</h2>
+            </div>
+            <span class="news-badge">Trending Now</span>
         </div>
-        <div class="card">
-            <h3>Google Gemini updates</h3>
-            <p>Gemini AI now supports advanced multimodal features and longer context.</p>
+        
+        <div class="news-carousel">
+            <div class="news-card breaking">
+                <div class="news-badge-top">🔥 BREAKING</div>
+                <div class="news-content">
+                    <span class="news-category">OpenAI</span>
+                    <h3>OpenAI Unveils GPT-5 with Human-Level Reasoning</h3>
+                    <p>Revolutionary AI model achieves AGI milestone with unprecedented problem-solving capabilities...</p>
+                    <div class="news-meta">
+                        <span class="news-time">2 hours ago</span>
+                        <span class="news-read">5 min read</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="news-card trending">
+                <div class="news-badge-top">📈 TRENDING</div>
+                <div class="news-content">
+                    <span class="news-category">Google</span>
+                    <h3>Google Gemini Dominates Multimodal AI Benchmark</h3>
+                    <p>Gemini outperforms all competitors in text, image, audio, and video understanding tests...</p>
+                    <div class="news-meta">
+                        <span class="news-time">4 hours ago</span>
+                        <span class="news-read">3 min read</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="news-card must-read">
+                <div class="news-badge-top">⚡ MUST READ</div>
+                <div class="news-content">
+                    <span class="news-category">Anthropic</span>
+                    <h3>Claude 3.5 Sets New Standard for AI Safety</h3>
+                    <p>Latest Claude release achieves 98% safety score while maintaining top-tier performance...</p>
+                    <div class="news-meta">
+                        <span class="news-time">6 hours ago</span>
+                        <span class="news-read">4 min read</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="news-card analysis">
+                <div class="news-badge-top">🎯 ANALYSIS</div>
+                <div class="news-content">
+                    <span class="news-category">Healthcare</span>
+                    <h3>How AI is Transforming Healthcare in 2026</h3>
+                    <p>From diagnosis to drug discovery, AI revolutionizes patient care across major hospitals...</p>
+                    <div class="news-meta">
+                        <span class="news-time">8 hours ago</span>
+                        <span class="news-read">7 min read</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="news-card guide">
+                <div class="news-badge-top">💡 GUIDE</div>
+                <div class="news-content">
+                    <span class="news-category">Development</span>
+                    <h3>Top 10 AI Tools Every Developer Should Use</h3>
+                    <p>Complete guide to integrating AI into your development workflow for maximum productivity...</p>
+                    <div class="news-meta">
+                        <span class="news-time">10 hours ago</span>
+                        <span class="news-read">6 min read</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="news-card new">
+                <div class="news-badge-top">🚀 NEW</div>
+                <div class="news-content">
+                    <span class="news-category">Video AI</span>
+                    <h3>Sora Video AI Now Available for Everyone</h3>
+                    <p>OpenAI launches public access to Sora video generation with enhanced quality and speed...</p>
+                    <div class="news-meta">
+                        <span class="news-time">12 hours ago</span>
+                        <span class="news-read">3 min read</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="news-card breaking">
+                <div class="news-badge-top">🔥 BREAKING</div>
+                <div class="news-content">
+                    <span class="news-category">Robotics</span>
+                    <h3>Boston Dynamics Unveils Humanoid AI Robot</h3>
+                    <p>Next-generation robot with GPT-5 brain can perform complex tasks autonomously...</p>
+                    <div class="news-meta">
+                        <span class="news-time">1 day ago</span>
+                        <span class="news-read">5 min read</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="news-card trending">
+                <div class="news-badge-top">📈 TRENDING</div>
+                <div class="news-content">
+                    <span class="news-category">Startups</span>
+                    <h3>AI Startup Funding Reaches $50B in Q1 2026</h3>
+                    <p>Record investment in AI companies signals continued boom in artificial intelligence sector...</p>
+                    <div class="news-meta">
+                        <span class="news-time">1 day ago</span>
+                        <span class="news-read">4 min read</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
+
+    <section id="results"></section>
 
     <section class="videos">
         <h2>🎬 AI Learning Videos</h2>
