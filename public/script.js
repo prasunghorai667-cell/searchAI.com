@@ -37,7 +37,9 @@ Industry analysts predict this release will accelerate AI adoption across health
         publishDate: "March 30, 2026",
         timeAgo: "2 hours ago",
         readTime: "5 min read",
-        tags: ["AI", "OpenAI", "GPT-5", "AGI", "Machine Learning"]
+        tags: ["AI", "OpenAI", "GPT-5", "AGI", "Machine Learning"],
+        externalLink: "https://openai.com/blog/gpt-5",
+        sourceName: "OpenAI Blog"
     },
     {
         id: 2,
@@ -66,7 +68,9 @@ The achievement signals a shift in the AI race, with Google now leading in the c
         publishDate: "March 30, 2026",
         timeAgo: "4 hours ago",
         readTime: "3 min read",
-        tags: ["Google", "Gemini", "Benchmark", "Multimodal"]
+        tags: ["Google", "Gemini", "Benchmark", "Multimodal"],
+        externalLink: "https://blog.google/technology/ai/gemini-update/",
+        sourceName: "Google Blog"
     },
     {
         id: 3,
@@ -97,7 +101,9 @@ The release has been welcomed by enterprise customers who have been cautious abo
         publishDate: "March 30, 2026",
         timeAgo: "6 hours ago",
         readTime: "4 min read",
-        tags: ["Anthropic", "Claude", "AI Safety", "Ethics"]
+        tags: ["Anthropic", "Claude", "AI Safety", "Ethics"],
+        externalLink: "https://www.anthropic.com/news/claude-3-5-sonnet",
+        sourceName: "Anthropic News"
     },
     {
         id: 4,
@@ -140,7 +146,9 @@ The result? Studies show a 35% improvement in patient outcomes at hospitals that
         publishDate: "March 30, 2026",
         timeAgo: "8 hours ago",
         readTime: "7 min read",
-        tags: ["Healthcare", "AI", "Diagnosis", "Innovation"]
+        tags: ["Healthcare", "AI", "Diagnosis", "Innovation"],
+        externalLink: "https://www.healthcareitnews.com/ai-healthcare",
+        sourceName: "Healthcare IT News"
     },
     {
         id: 5,
@@ -189,7 +197,9 @@ Integration Tips:
         publishDate: "March 30, 2026",
         timeAgo: "10 hours ago",
         readTime: "6 min read",
-        tags: ["Development", "Tools", "Productivity", "Coding"]
+        tags: ["Development", "Tools", "Productivity", "Coding"],
+        externalLink: "https://dev.to/best-ai-tools-for-developers",
+        sourceName: "Dev.to"
     },
     {
         id: 6,
@@ -236,7 +246,9 @@ Early users report the quality is indistinguishable from professionally shot foo
         publishDate: "March 30, 2026",
         timeAgo: "12 hours ago",
         readTime: "3 min read",
-        tags: ["Sora", "Video AI", "OpenAI", "Generation"]
+        tags: ["Sora", "Video AI", "OpenAI", "Generation"],
+        externalLink: "https://openai.com/sora",
+        sourceName: "OpenAI Sora"
     },
     {
         id: 7,
@@ -286,7 +298,9 @@ Pre-orders are now open for enterprise customers, with general availability expe
         publishDate: "March 29, 2026",
         timeAgo: "1 day ago",
         readTime: "5 min read",
-        tags: ["Robotics", "Boston Dynamics", "Atlas", "AI"]
+        tags: ["Robotics", "Boston Dynamics", "Atlas", "AI"],
+        externalLink: "https://www.bostondynamics.com/atlas",
+        sourceName: "Boston Dynamics"
     },
     {
         id: 8,
@@ -330,9 +344,14 @@ Market analysts predict this momentum will continue through 2026, with total ann
         publishDate: "March 29, 2026",
         timeAgo: "1 day ago",
         readTime: "4 min read",
-        tags: ["Startups", "Funding", "Venture Capital", "Investment"]
+        tags: ["Startups", "Funding", "Venture Capital", "Investment"],
+        externalLink: "https://techcrunch.com/ai-startup-funding-2026",
+        sourceName: "TechCrunch"
     }
 ];
+
+let newsHistory = [];
+let historyIndex = -1;
 
 function renderNewsCards() {
     const carousel = document.getElementById('newsCarousel');
@@ -366,9 +385,17 @@ function getTypeEmoji(type) {
     return emojis[type] || '📰';
 }
 
-function openNewsModal(newsId) {
+function openNewsModal(newsId, addToHistory = true) {
     const news = newsData.find(n => n.id === newsId);
     if (!news) return;
+    
+    if (addToHistory) {
+        if (historyIndex < newsHistory.length - 1) {
+            newsHistory = newsHistory.slice(0, historyIndex + 1);
+        }
+        newsHistory.push(newsId);
+        historyIndex = newsHistory.length - 1;
+    }
     
     const modal = document.getElementById('newsModal');
     const modalBody = document.getElementById('newsModalBody');
@@ -382,6 +409,15 @@ function openNewsModal(newsId) {
     
     modalBody.innerHTML = `
         <div class="modal-article">
+            <div class="modal-header-bar">
+                <button class="modal-back-btn" onclick="goBackInHistory()" ${historyIndex <= 0 ? 'disabled' : ''}>
+                    ← Back
+                </button>
+                <span class="modal-history-count">
+                    ${historyIndex + 1} of ${newsHistory.length}
+                </span>
+            </div>
+            
             <div class="modal-header">
                 <span class="modal-category ${news.type}">${getTypeEmoji(news.type)} ${news.category}</span>
                 <span class="modal-date">${news.publishDate}</span>
@@ -410,6 +446,12 @@ function openNewsModal(newsId) {
                 }).join('')}
             </div>
             
+            <div class="modal-source-section">
+                <a href="${news.externalLink}" target="_blank" class="modal-source-link">
+                    📖 Read Full Article on ${news.sourceName} →
+                </a>
+            </div>
+            
             ${relatedNews.length > 0 ? `
                 <div class="modal-related">
                     <h2 class="related-title">📰 Related News</h2>
@@ -434,10 +476,102 @@ function openNewsModal(newsId) {
     document.body.style.overflow = 'hidden';
 }
 
+function goBackInHistory() {
+    if (historyIndex > 0) {
+        historyIndex--;
+        const prevNewsId = newsHistory[historyIndex];
+        const news = newsData.find(n => n.id === prevNewsId);
+        if (news) {
+            updateModalContent(prevNewsId);
+        }
+    }
+}
+
+function updateModalContent(newsId) {
+    const news = newsData.find(n => n.id === newsId);
+    if (!news) return;
+    
+    const modalBody = document.getElementById('newsModalBody');
+    
+    const relatedNews = newsData
+        .filter(n => n.id !== newsId && (
+            n.category === news.category || 
+            n.tags.some(tag => news.tags.includes(tag))
+        ))
+        .slice(0, 4);
+    
+    modalBody.innerHTML = `
+        <div class="modal-article">
+            <div class="modal-header-bar">
+                <button class="modal-back-btn" onclick="goBackInHistory()" ${historyIndex <= 0 ? 'disabled' : ''}>
+                    ← Back
+                </button>
+                <span class="modal-history-count">
+                    ${historyIndex + 1} of ${newsHistory.length}
+                </span>
+            </div>
+            
+            <div class="modal-header">
+                <span class="modal-category ${news.type}">${getTypeEmoji(news.type)} ${news.category}</span>
+                <span class="modal-date">${news.publishDate}</span>
+            </div>
+            
+            <h1 class="modal-headline">${news.headline}</h1>
+            
+            <div class="modal-meta">
+                <span class="modal-author">By ${news.author}</span>
+                <span class="modal-readtime">${news.readTime}</span>
+                <span class="modal-time">${news.timeAgo}</span>
+            </div>
+            
+            <div class="modal-tags">
+                ${news.tags.map(tag => `<span class="modal-tag">${tag}</span>`).join('')}
+            </div>
+            
+            <div class="modal-body">
+                ${news.fullContent.split('\n\n').map(para => {
+                    if (para.startsWith('•')) {
+                        return `<ul>${para.split('\n').map(item => `<li>${item.replace('• ', '')}</li>`).join('')}</ul>`;
+                    } else if (para.startsWith('**')) {
+                        return `<h3>${para.replace(/\*\*/g, '')}</h3>`;
+                    }
+                    return `<p>${para}</p>`;
+                }).join('')}
+            </div>
+            
+            <div class="modal-source-section">
+                <a href="${news.externalLink}" target="_blank" class="modal-source-link">
+                    📖 Read Full Article on ${news.sourceName} →
+                </a>
+            </div>
+            
+            ${relatedNews.length > 0 ? `
+                <div class="modal-related">
+                    <h2 class="related-title">📰 Related News</h2>
+                    <div class="related-grid">
+                        ${relatedNews.map(r => `
+                            <div class="related-card ${r.type}" onclick="openNewsModal(${r.id})">
+                                <span class="related-badge">${getTypeEmoji(r.type)} ${r.type.replace('-', ' ')}</span>
+                                <h4>${r.headline}</h4>
+                                <div class="related-meta">
+                                    <span>${r.category}</span>
+                                    <span>${r.timeAgo}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
+        </div>
+    `;
+}
+
 function closeNewsModal() {
     const modal = document.getElementById('newsModal');
     modal.classList.remove('active');
     document.body.style.overflow = 'auto';
+    newsHistory = [];
+    historyIndex = -1;
 }
 
 document.addEventListener('keydown', (e) => {
@@ -448,6 +582,7 @@ document.addEventListener('keydown', (e) => {
 
 window.openNewsModal = openNewsModal;
 window.closeNewsModal = closeNewsModal;
+window.goBackInHistory = goBackInHistory;
 
 function extractKeywords(query) {
     return query.toLowerCase()
