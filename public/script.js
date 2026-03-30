@@ -353,6 +353,121 @@ Market analysts predict this momentum will continue through 2026, with total ann
 let newsHistory = [];
 let historyIndex = -1;
 
+const trendingTools = [
+    {
+        name: "ChatGPT",
+        description: "Advanced AI chatbot for conversation, coding, writing",
+        link: "https://chat.openai.com",
+        icon: "🤖",
+        userCount: "100M+ users"
+    },
+    {
+        name: "Claude",
+        description: "AI assistant for reasoning, analysis & writing",
+        link: "https://claude.ai",
+        icon: "🧠",
+        userCount: "50M+ users"
+    },
+    {
+        name: "Gemini",
+        description: "Google's multimodal AI for text, images, video",
+        link: "https://gemini.google.com",
+        icon: "✨",
+        userCount: "80M+ users"
+    },
+    {
+        name: "Midjourney",
+        description: "AI image generation for stunning artwork",
+        link: "https://www.midjourney.com",
+        icon: "🎨",
+        userCount: "25M+ users"
+    },
+    {
+        name: "Runway",
+        description: "AI-powered video editing & generation",
+        link: "https://runwayml.com",
+        icon: "🎬",
+        userCount: "15M+ users"
+    },
+    {
+        name: "Sora",
+        description: "Text-to-video AI by OpenAI",
+        link: "https://openai.com/sora",
+        icon: "🎥",
+        userCount: "10M+ users"
+    },
+    {
+        name: "Cursor",
+        description: "AI-first code editor for developers",
+        link: "https://cursor.com",
+        icon: "💻",
+        userCount: "8M+ users"
+    },
+    {
+        name: "GitHub Copilot",
+        description: "AI pair programmer by GitHub",
+        link: "https://github.com/features/copilot",
+        icon: "⚡",
+        userCount: "20M+ users"
+    },
+    {
+        name: "Perplexity",
+        description: "AI-powered search engine with answers",
+        link: "https://perplexity.ai",
+        icon: "🔍",
+        userCount: "30M+ users"
+    },
+    {
+        name: "Suno",
+        description: "AI music generation with vocals",
+        link: "https://suno.ai",
+        icon: "🎵",
+        userCount: "12M+ users"
+    },
+    {
+        name: "DALL-E",
+        description: "AI image generation by OpenAI",
+        link: "https://openai.com/dall-e-3",
+        icon: "🖼️",
+        userCount: "18M+ users"
+    },
+    {
+        name: "ElevenLabs",
+        description: "AI voice synthesis & voice cloning",
+        link: "https://elevenlabs.io",
+        icon: "🎙️",
+        userCount: "6M+ users"
+    }
+];
+
+function getToolLogoUrl(link) {
+    try {
+        const url = new URL(link);
+        const domain = url.hostname.replace('www.', '');
+        return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+    } catch {
+        return '';
+    }
+}
+
+function renderTrendingTools() {
+    const carousel = document.getElementById('trendingCarousel');
+    if (!carousel) return;
+    
+    carousel.innerHTML = trendingTools.map(tool => `
+        <a href="${tool.link}" target="_blank" class="trending-tool-card">
+            <div class="trending-tool-logo">
+                <img src="${getToolLogoUrl(tool.link)}" alt="${tool.name}" onerror="this.parentElement.innerHTML='<span class='trending-tool-icon'>${tool.icon}</span>'">
+            </div>
+            <div class="trending-tool-info">
+                <h3>${tool.name}</h3>
+                <p>${tool.description}</p>
+                <span class="trending-user-count">👥 ${tool.userCount}</span>
+            </div>
+        </a>
+    `).join('');
+}
+
 function renderNewsCards() {
     const carousel = document.getElementById('newsCarousel');
     if (!carousel) return;
@@ -770,6 +885,7 @@ function searchAI() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    renderTrendingTools();
     renderNewsCards();
     
     const searchInput = document.getElementById('searchInput');

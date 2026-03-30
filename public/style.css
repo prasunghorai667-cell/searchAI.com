@@ -849,6 +849,165 @@ iframe {
     }
 }
 
+/* ========== TRENDING AI TOOLS SECTION ========== */
+.trending-tools {
+    position: relative;
+    z-index: 5;
+    padding: 0 30px 25px;
+}
+
+.trending-tools::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 30px;
+    right: 30px;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(10, 6, 20, 0.85), rgba(26, 10, 46, 0.85));
+    border-radius: 20px;
+    z-index: -1;
+}
+
+.trending-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 5px 15px;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+    margin-bottom: 15px;
+}
+
+.trending-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.trending-icon {
+    font-size: 1.5rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+.trending-tools h2 {
+    background: linear-gradient(135deg, #FFD700, #FF6B6B, #00FFFF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.trending-badge {
+    background: linear-gradient(135deg, #FF6B6B, #FF4444);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    animation: badge-glow 2s ease-in-out infinite;
+}
+
+.trending-carousel {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding: 10px 5px 15px;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #FFD700 #1a0a2e;
+}
+
+.trending-carousel::-webkit-scrollbar {
+    height: 6px;
+}
+
+.trending-carousel::-webkit-scrollbar-track {
+    background: rgba(26, 10, 46, 0.5);
+    border-radius: 10px;
+}
+
+.trending-carousel::-webkit-scrollbar-thumb {
+    background: linear-gradient(90deg, #FFD700, #9D4EDD);
+    border-radius: 10px;
+}
+
+.trending-tool-card {
+    flex: 0 0 220px;
+    background: linear-gradient(145deg, rgba(26, 10, 46, 0.95), rgba(10, 6, 20, 0.95));
+    border-radius: 16px;
+    padding: 18px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    text-decoration: none;
+    color: white;
+    transition: all 0.4s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+}
+
+.trending-tool-card:hover {
+    transform: translateY(-8px) scale(1.05);
+    border-color: rgba(255, 215, 0, 0.6);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(255, 215, 0, 0.3);
+}
+
+.trending-tool-logo {
+    width: 65px;
+    height: 65px;
+    background: white;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.trending-tool-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.trending-tool-icon {
+    font-size: 2rem;
+}
+
+.trending-tool-info h3 {
+    font-size: 1rem;
+    color: #FFD700;
+    margin: 0 0 5px 0;
+    font-weight: 600;
+}
+
+.trending-tool-info p {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0 0 8px 0;
+    line-height: 1.4;
+}
+
+.trending-user-count {
+    font-size: 10px;
+    color: #00FFFF;
+    background: rgba(0, 255, 255, 0.1);
+    padding: 3px 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 255, 255, 0.2);
+}
+
 /* ========== LATEST NEWS SECTION ========== */
 .latest-news {
     position: relative;
@@ -1135,6 +1294,43 @@ iframe {
 }
 
 @media (max-width: 768px) {
+    .trending-tools {
+        padding: 0 15px 20px;
+    }
+    
+    .trending-tools::before {
+        left: 15px;
+        right: 15px;
+    }
+    
+    .trending-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .trending-tools h2 {
+        font-size: 1.1rem;
+    }
+    
+    .trending-tool-card {
+        flex: 0 0 180px;
+        padding: 15px;
+    }
+    
+    .trending-tool-logo {
+        width: 55px;
+        height: 55px;
+    }
+    
+    .trending-tool-info h3 {
+        font-size: 0.9rem;
+    }
+    
+    .trending-tool-info p {
+        font-size: 10px;
+    }
+    
     .latest-news {
         padding: 0 15px 20px;
     }
