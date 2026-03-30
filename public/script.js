@@ -110,3 +110,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+window.searchAI = searchAI;
