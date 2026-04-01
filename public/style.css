@@ -37,12 +37,6 @@ body {
         radial-gradient(ellipse at 50% 50%, rgba(191, 64, 191, 0.1) 0%, transparent 50%),
         radial-gradient(ellipse at 80% 20%, rgba(0, 255, 255, 0.1) 0%, transparent 30%),
         radial-gradient(ellipse at 20% 80%, rgba(255, 165, 0, 0.15) 0%, transparent 30%);
-    animation: bg-pulse 8s ease-in-out infinite;
-}
-
-@keyframes bg-pulse {
-    0%, 100% { opacity: 0.8; }
-    50% { opacity: 1; }
 }
 
 /* Hexagonal Grid */
@@ -1040,7 +1034,14 @@ iframe {
 }
 
 /* Mobile - Large Phone (768px and below) */
+/* ========== MOBILE PERFORMANCE OPTIMIZATION ========== */
 @media (max-width: 768px) {
+    * {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+    
     header {
         padding: 10px 15px 8px;
     }
@@ -1082,6 +1083,11 @@ iframe {
     input {
         padding: 10px 40px 10px 15px;
         font-size: 14px;
+        box-shadow: none !important;
+    }
+    
+    input:focus {
+        box-shadow: 0 0 0 2px rgba(0, 255, 200, 0.3) !important;
     }
     
     .search-hint {
@@ -1097,6 +1103,7 @@ iframe {
     .latest-news::before {
         left: 15px;
         right: 15px;
+        background: rgba(10, 6, 20, 0.95);
     }
     
     .trending-tools h2 {
@@ -1104,21 +1111,27 @@ iframe {
     }
     
     .trending-tool-card {
-        flex: 0 0 170px;
-        padding: 15px 12px;
+        flex: 0 0 160px;
+        padding: 12px 10px;
+        border: none;
+        background: rgba(20, 15, 35, 0.95);
+    }
+    
+    .trending-tool-card:hover {
+        transform: none;
+        box-shadow: none;
     }
     
     .trending-tool-logo {
-        width: 45px;
-        height: 45px;
+        width: 40px;
+        height: 40px;
     }
     
     .trending-tool-info h3 {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
     }
     
     .trending-tool-info p {
-        font-size: 10px;
         display: none;
     }
     
@@ -1131,16 +1144,26 @@ iframe {
     }
     
     .news-card {
-        flex: 0 0 260px;
-        padding: 15px;
+        flex: 0 0 240px;
+        padding: 12px;
+        border: none;
+        background: rgba(20, 15, 35, 0.95);
+    }
+    
+    .news-card:hover {
+        transform: none;
     }
     
     .news-card h3 {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
     }
     
     .news-card p {
-        font-size: 12px;
+        font-size: 11px;
+    }
+    
+    .news-card::before {
+        display: none;
     }
     
     #results {
@@ -1150,6 +1173,7 @@ iframe {
     #results::before {
         left: 15px;
         right: 15px;
+        background: rgba(10, 6, 20, 0.95);
     }
     
     .results-header {
@@ -1165,6 +1189,17 @@ iframe {
     
     .results-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .result-card {
+        padding: 15px;
+        border: none;
+        background: rgba(20, 15, 35, 0.95);
+    }
+    
+    .result-card:hover {
+        transform: none;
+        box-shadow: none;
     }
     
     .tool-logo {
@@ -1186,17 +1221,37 @@ iframe {
     }
     
     .video-grid iframe {
-        height: 220px;
+        height: 200px;
         margin: 0;
+        border: none;
+        box-shadow: none;
     }
     
-    .particle, .geo-shape, .dna-helix {
-        display: none;
+    /* Hide all heavy animations on mobile */
+    .wakanda-bg,
+    .hex-grid,
+    .shimmer,
+    .energy-ring,
+    .particle-explosion,
+    .geo-shape,
+    .neural-node,
+    .neural-connection,
+    .particle,
+    .shooting-star,
+    .brain-glow,
+    .grid-overlay,
+    .scan-line,
+    .dna-helix {
+        display: none !important;
+    }
+    
+    .wakanda-bg {
+        background: #0a0614;
     }
     
     /* Modal Responsive */
     .modal-article {
-        padding: 20px;
+        padding: 15px;
     }
     
     .modal-header-bar {
@@ -1206,36 +1261,65 @@ iframe {
     }
     
     .modal-headline {
-        font-size: 1.3rem;
+        font-size: 1.2rem;
     }
     
     .modal-meta {
-        gap: 12px;
+        gap: 10px;
+        flex-wrap: wrap;
     }
     
     .modal-body {
-        font-size: 14px;
+        font-size: 13px;
+        line-height: 1.5;
     }
     
     .modal-source-section {
-        padding: 15px;
+        padding: 12px;
     }
     
     .modal-source-link {
-        font-size: 12px;
-        padding: 10px 15px;
+        font-size: 11px;
+        padding: 8px 12px;
     }
     
     .related-grid {
         grid-template-columns: 1fr;
     }
     
+    .related-card {
+        padding: 12px;
+        border: none;
+        background: rgba(20, 15, 35, 0.95);
+    }
+    
+    .related-card:hover {
+        transform: none;
+    }
+    
     .news-modal-close {
         top: 10px;
         right: 10px;
-        width: 35px;
-        height: 35px;
-        font-size: 16px;
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+    
+    .news-modal-content {
+        border-radius: 12px;
+        max-height: 95vh;
+    }
+    
+    /* Simplify carousels */
+    .trending-carousel,
+    .news-carousel {
+        gap: 10px;
+        padding: 8px 0;
+    }
+    
+    .trending-carousel::-webkit-scrollbar,
+    .news-carousel::-webkit-scrollbar {
+        display: none;
     }
 }
 
@@ -1246,7 +1330,7 @@ iframe {
     }
     
     body {
-        padding-top: 80px;
+        padding-top: 75px;
     }
     
     .header-bar {
@@ -1281,11 +1365,13 @@ iframe {
     .latest-news::before {
         left: 12px;
         right: 12px;
+        background: rgba(10, 6, 20, 0.95);
     }
     
     .trending-header,
     .news-header {
-        padding: 12px 5px 10px;
+        padding: 10px 5px 8px;
+        margin-bottom: 12px;
     }
     
     .trending-tools h2,
@@ -1296,21 +1382,26 @@ iframe {
     .trending-badge,
     .news-badge {
         font-size: 9px;
-        padding: 4px 10px;
+        padding: 3px 8px;
     }
     
     .trending-tool-card {
-        flex: 0 0 150px;
-        padding: 12px 10px;
+        flex: 0 0 140px;
+        padding: 10px 8px;
     }
     
     .trending-tool-logo {
-        width: 40px;
-        height: 40px;
+        width: 35px;
+        height: 35px;
+    }
+    
+    .trending-tool-info h3 {
+        font-size: 0.75rem;
     }
     
     .trending-user-count {
-        font-size: 9px;
+        font-size: 8px;
+        padding: 2px 6px;
     }
     
     .latest-news {
@@ -1318,31 +1409,34 @@ iframe {
     }
     
     .news-card {
-        flex: 0 0 240px;
-        padding: 12px;
+        flex: 0 0 220px;
+        padding: 10px;
     }
     
     .news-badge-top {
-        font-size: 9px;
-        padding: 3px 8px;
+        font-size: 8px;
+        padding: 2px 6px;
+        top: 10px;
+        right: 10px;
     }
     
     .news-category {
-        font-size: 10px;
+        font-size: 9px;
     }
     
     .news-card h3 {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         -webkit-line-clamp: 2;
     }
     
     .news-card p {
-        font-size: 11px;
         display: none;
     }
     
     .news-meta {
-        font-size: 10px;
+        font-size: 9px;
+        padding-top: 8px;
+        margin-top: 8px;
     }
     
     #results {
@@ -1352,6 +1446,7 @@ iframe {
     #results::before {
         left: 12px;
         right: 12px;
+        background: rgba(10, 6, 20, 0.95);
     }
     
     .results-header {
@@ -1368,50 +1463,73 @@ iframe {
     }
     
     .result-card {
-        padding: 15px;
+        padding: 12px;
+    }
+    
+    .card-header {
+        gap: 10px;
+    }
+    
+    .tool-logo {
+        width: 35px;
+        height: 35px;
     }
     
     .tool-title h3 {
-        font-size: 1rem;
+        font-size: 0.95rem;
+    }
+    
+    .tool-link {
+        font-size: 11px;
     }
     
     .best-for {
         padding: 8px 10px;
     }
     
+    .best-for-label {
+        font-size: 10px;
+    }
+    
     .best-for-text {
-        font-size: 12px;
+        font-size: 11px;
     }
     
     .videos {
-        padding: 15px 12px;
+        padding: 12px 12px 15px;
     }
     
     .video-grid iframe {
-        height: 200px;
+        height: 180px;
     }
     
     .suggestions {
-        border-radius: 0 0 15px 15px;
-        max-height: 250px;
+        border-radius: 0 0 12px 12px;
+        max-height: 220px;
     }
     
     .suggestion-item {
-        padding: 10px 12px;
+        padding: 8px 12px;
+        font-size: 13px;
     }
     
     .suggestion-section {
         font-size: 9px;
-        padding: 6px 12px;
+        padding: 5px 12px;
+    }
+    
+    .suggestion-logo {
+        width: 18px;
+        height: 18px;
     }
     
     /* Modal for small phones */
     .modal-article {
-        padding: 15px;
+        padding: 12px;
     }
     
     .modal-headline {
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
     
     .modal-meta {
@@ -1420,20 +1538,30 @@ iframe {
     }
     
     .modal-body {
-        font-size: 13px;
-        line-height: 1.6;
+        font-size: 12px;
+        line-height: 1.5;
     }
     
     .modal-body h3 {
-        font-size: 1rem;
+        font-size: 0.95rem;
+    }
+    
+    .modal-tags {
+        gap: 6px;
+    }
+    
+    .modal-tag {
+        font-size: 10px;
+        padding: 4px 10px;
     }
     
     .related-title {
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
     
     .news-modal-content {
-        border-radius: 16px;
+        border-radius: 12px;
+        max-height: 95vh;
     }
 }
 
@@ -1444,7 +1572,7 @@ iframe {
     }
     
     body {
-        padding-top: 75px;
+        padding-top: 70px;
     }
     
     input {
@@ -1453,11 +1581,15 @@ iframe {
     }
     
     .trending-tool-card {
-        flex: 0 0 130px;
+        flex: 0 0 120px;
     }
     
     .news-card {
-        flex: 0 0 210px;
+        flex: 0 0 200px;
+    }
+    
+    .result-card {
+        padding: 10px;
     }
 }
 
