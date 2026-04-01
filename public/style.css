@@ -21,6 +21,7 @@ body {
     z-index: 0;
     background: linear-gradient(135deg, #0a0614 0%, #1a0a2e 25%, #2d1b4e 50%, #1a0a2e 75%, #0a0614 100%);
     overflow: hidden;
+    pointer-events: none;
 }
 
 .wakanda-bg::before {
@@ -1001,19 +1002,160 @@ iframe {
     height: 250px;
 }
 
+/* ========== RESPONSIVE DESIGN ========== */
+
+/* Tablet - iPad (768px - 1024px) */
+@media (max-width: 1024px) {
+    header {
+        padding: 12px 20px 10px;
+    }
+    
+    body {
+        padding-top: 100px;
+    }
+    
+    .search-container {
+        max-width: 90%;
+    }
+    
+    .trending-tools {
+        padding: 15px 20px 20px;
+    }
+    
+    .trending-tool-card {
+        flex: 0 0 200px;
+    }
+    
+    .latest-news {
+        padding: 0 20px 25px;
+    }
+    
+    .news-card {
+        flex: 0 0 300px;
+    }
+    
+    .results-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Mobile - Large Phone (768px and below) */
 @media (max-width: 768px) {
-    h1 {
-        font-size: 1.6rem;
+    header {
+        padding: 10px 15px 8px;
+    }
+    
+    body {
+        padding-top: 90px;
+    }
+    
+    .header-bar {
+        margin-bottom: 8px;
+    }
+    
+    .home-btn {
+        position: static;
+        transform: none;
+        padding: 5px 10px;
+        font-size: 11px;
+    }
+    
+    .home-text {
+        display: none;
+    }
+    
+    .back-btn {
+        position: static;
+        transform: none;
+        padding: 5px 10px;
+        font-size: 11px;
+    }
+    
+    .search-container {
+        max-width: 100%;
+    }
+    
+    .search-wrapper {
+        max-width: 100%;
     }
     
     input {
-        font-size: 14px;
         padding: 10px 40px 10px 15px;
+        font-size: 14px;
+    }
+    
+    .search-hint {
+        font-size: 10px;
+        display: none;
+    }
+    
+    .trending-tools {
+        padding: 15px 15px 20px;
+    }
+    
+    .trending-tools::before,
+    .latest-news::before {
+        left: 15px;
+        right: 15px;
+    }
+    
+    .trending-tools h2 {
+        font-size: 1rem;
+    }
+    
+    .trending-tool-card {
+        flex: 0 0 170px;
+        padding: 15px 12px;
+    }
+    
+    .trending-tool-logo {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .trending-tool-info h3 {
+        font-size: 0.85rem;
+    }
+    
+    .trending-tool-info p {
+        font-size: 10px;
+        display: none;
+    }
+    
+    .latest-news {
+        padding: 0 15px 20px;
+    }
+    
+    .latest-news h2 {
+        font-size: 1rem;
+    }
+    
+    .news-card {
+        flex: 0 0 260px;
+        padding: 15px;
+    }
+    
+    .news-card h3 {
+        font-size: 0.9rem;
+    }
+    
+    .news-card p {
+        font-size: 12px;
+    }
+    
+    #results {
+        padding: 15px;
+    }
+    
+    #results::before {
+        left: 15px;
+        right: 15px;
     }
     
     .results-header {
+        padding: 12px 15px;
         flex-direction: column;
-        align-items: flex-start;
+        gap: 10px;
     }
     
     .clear-search-btn {
@@ -1030,50 +1172,292 @@ iframe {
         height: 40px;
     }
     
-    .particle, .geo-shape, .dna-helix {
-        display: none;
-    }
-}
-    
-    input {
-        font-size: 15px;
-        padding: 14px 50px 14px 20px;
+    .videos {
+        padding: 20px 15px;
     }
     
-    .results-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .tool-logo {
-        width: 48px;
-        height: 48px;
-    }
-    
-    .particle, .geo-shape, .dna-helix {
-        display: none;
-    }
-}
-
-@media (max-width: 500px) {
-    header {
-        padding: 25px 15px;
-    }
-    
-    h1 {
-        font-size: 1.4rem;
-        letter-spacing: 1px;
-    }
-    
-    .search-hint {
-        font-size: 12px;
+    .videos h2 {
+        font-size: 1rem;
     }
     
     .video-grid {
         grid-template-columns: 1fr;
+        gap: 15px;
     }
     
     .video-grid iframe {
         height: 220px;
+        margin: 0;
+    }
+    
+    .particle, .geo-shape, .dna-helix {
+        display: none;
+    }
+    
+    /* Modal Responsive */
+    .modal-article {
+        padding: 20px;
+    }
+    
+    .modal-header-bar {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    
+    .modal-headline {
+        font-size: 1.3rem;
+    }
+    
+    .modal-meta {
+        gap: 12px;
+    }
+    
+    .modal-body {
+        font-size: 14px;
+    }
+    
+    .modal-source-section {
+        padding: 15px;
+    }
+    
+    .modal-source-link {
+        font-size: 12px;
+        padding: 10px 15px;
+    }
+    
+    .related-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .news-modal-close {
+        top: 10px;
+        right: 10px;
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+    }
+}
+
+/* Mobile - Small Phone (480px and below) */
+@media (max-width: 480px) {
+    header {
+        padding: 8px 12px 6px;
+    }
+    
+    body {
+        padding-top: 80px;
+    }
+    
+    .header-bar {
+        gap: 8px;
+    }
+    
+    .home-btn, .back-btn {
+        padding: 4px 8px;
+        font-size: 10px;
+    }
+    
+    .home-icon {
+        font-size: 12px;
+    }
+    
+    input {
+        padding: 8px 35px 8px 12px;
+        font-size: 13px;
+        border-radius: 20px;
+    }
+    
+    .search-wrapper::after {
+        font-size: 16px;
+        right: 12px;
+    }
+    
+    .trending-tools {
+        padding: 12px 12px 15px;
+    }
+    
+    .trending-tools::before,
+    .latest-news::before {
+        left: 12px;
+        right: 12px;
+    }
+    
+    .trending-header,
+    .news-header {
+        padding: 12px 5px 10px;
+    }
+    
+    .trending-tools h2,
+    .latest-news h2 {
+        font-size: 0.9rem;
+    }
+    
+    .trending-badge,
+    .news-badge {
+        font-size: 9px;
+        padding: 4px 10px;
+    }
+    
+    .trending-tool-card {
+        flex: 0 0 150px;
+        padding: 12px 10px;
+    }
+    
+    .trending-tool-logo {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .trending-user-count {
+        font-size: 9px;
+    }
+    
+    .latest-news {
+        padding: 0 12px 15px;
+    }
+    
+    .news-card {
+        flex: 0 0 240px;
+        padding: 12px;
+    }
+    
+    .news-badge-top {
+        font-size: 9px;
+        padding: 3px 8px;
+    }
+    
+    .news-category {
+        font-size: 10px;
+    }
+    
+    .news-card h3 {
+        font-size: 0.85rem;
+        -webkit-line-clamp: 2;
+    }
+    
+    .news-card p {
+        font-size: 11px;
+        display: none;
+    }
+    
+    .news-meta {
+        font-size: 10px;
+    }
+    
+    #results {
+        padding: 12px;
+    }
+    
+    #results::before {
+        left: 12px;
+        right: 12px;
+    }
+    
+    .results-header {
+        padding: 10px 12px;
+    }
+    
+    .results-count {
+        font-size: 0.9rem;
+    }
+    
+    .clear-search-btn {
+        font-size: 12px;
+        padding: 8px 15px;
+    }
+    
+    .result-card {
+        padding: 15px;
+    }
+    
+    .tool-title h3 {
+        font-size: 1rem;
+    }
+    
+    .best-for {
+        padding: 8px 10px;
+    }
+    
+    .best-for-text {
+        font-size: 12px;
+    }
+    
+    .videos {
+        padding: 15px 12px;
+    }
+    
+    .video-grid iframe {
+        height: 200px;
+    }
+    
+    .suggestions {
+        border-radius: 0 0 15px 15px;
+        max-height: 250px;
+    }
+    
+    .suggestion-item {
+        padding: 10px 12px;
+    }
+    
+    .suggestion-section {
+        font-size: 9px;
+        padding: 6px 12px;
+    }
+    
+    /* Modal for small phones */
+    .modal-article {
+        padding: 15px;
+    }
+    
+    .modal-headline {
+        font-size: 1.1rem;
+    }
+    
+    .modal-meta {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .modal-body {
+        font-size: 13px;
+        line-height: 1.6;
+    }
+    
+    .modal-body h3 {
+        font-size: 1rem;
+    }
+    
+    .related-title {
+        font-size: 1.1rem;
+    }
+    
+    .news-modal-content {
+        border-radius: 16px;
+    }
+}
+
+/* Mobile - Extra Small (320px) */
+@media (max-width: 320px) {
+    header {
+        padding: 6px 10px 5px;
+    }
+    
+    body {
+        padding-top: 75px;
+    }
+    
+    input {
+        font-size: 12px;
+        padding: 7px 30px 7px 10px;
+    }
+    
+    .trending-tool-card {
+        flex: 0 0 130px;
+    }
+    
+    .news-card {
+        flex: 0 0 210px;
     }
 }
 
