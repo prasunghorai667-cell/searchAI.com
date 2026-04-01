@@ -732,6 +732,11 @@ main {
     position: relative;
 }
 
+.videos {
+    padding-top: 15px;
+    margin-top: -15px;
+}
+
 .news::before, .videos::before {
     content: '';
     position: absolute;
@@ -1756,7 +1761,8 @@ iframe {
 .latest-news {
     position: relative;
     z-index: 5;
-    padding: 0 30px 30px;
+    padding: 0 30px 15px;
+    margin-bottom: -15px;
 }
 
 .latest-news::before {
@@ -1831,7 +1837,7 @@ iframe {
     display: flex;
     gap: 20px;
     overflow-x: auto;
-    padding: 10px 5px 20px;
+    padding: 10px 5px 10px;
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: #FFD700 #1a0a2e;
