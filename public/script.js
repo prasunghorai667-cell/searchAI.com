@@ -313,4 +313,53 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') searchAI(); });
     searchInput.addEventListener('blur', () => { setTimeout(() => { document.getElementById("suggestions").style.display = "none"; }, 200); });
     searchInput.addEventListener('focus', () => { if (searchInput.value.length > 0) showSuggestions(searchInput.value); });
+
+    initWebSocket();
 });
+
+let ws = null;
+let reconnectAttempts = 0;
+const maxReconnectAttempts = 10;
+const reconnectDelay = 3000;
+
+function initWebSocket() {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}`;
+
+    function connect() {
+        ws = new WebSocket(wsUrl);
+
+        ws.onopen = () => {
+            console.log("WebSocket connected");
+            reconnectAttempts = 0;
+        };
+
+        ws.onmessage = (event) => {
+            if (event.data === "pong") {
+                ws.isAlive = true;
+            }
+        };
+
+        ws.onclose = () => {
+            console.log("WebSocket disconnected");
+            ws = null;
+            if (reconnectAttempts < maxReconnectAttempts) {
+                reconnectAttempts++;
+                console.log(`Reconnecting... attempt ${reconnectAttempts}/${maxReconnectAttempts}`);
+                setTimeout(connect, reconnectDelay);
+            }
+        };
+
+        ws.onerror = () => {
+            ws.close();
+        };
+    }
+
+    connect();
+
+    setInterval(() => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send("ping");
+        }
+    }, 600000);
+}
