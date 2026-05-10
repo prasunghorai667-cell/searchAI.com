@@ -9,6 +9,65 @@ const allKeywords = [...new Set(
     ].flat())
 )].filter(k => k.length > 2);
 
+const allTags = [...new Set(aiTools.flatMap(t => t.tags.map(tag => tag.toLowerCase())))];
+
+const tagToolMap = {};
+aiTools.forEach(tool => {
+    tool.tags.forEach(tag => {
+        const key = tag.toLowerCase();
+        if (!tagToolMap[key]) tagToolMap[key] = [];
+        tagToolMap[key].push(tool);
+    });
+});
+
+function levenshteinDistance(a, b) {
+    const m = a.length, n = b.length;
+    const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+    for (let i = 0; i <= m; i++) dp[i][0] = i;
+    for (let j = 0; j <= n; j++) dp[0][j] = j;
+    for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] : Math.min(dp[i - 1][j - 1] + 1, dp[i][j - 1] + 1, dp[i - 1][j] + 1);
+        }
+    }
+    return dp[m][n];
+}
+
+function stem(word) {
+    if (word.length < 4) return word;
+    let w = word;
+    if (w.endsWith('ies')) return w.slice(0, -3) + 'y';
+    if (w.endsWith('ves')) return w.slice(0, -3) + 'f';
+    if (w.endsWith('es') && !w.endsWith('ss')) return w.slice(0, -2);
+    if (w.endsWith('s') && !w.endsWith('ss')) return w.slice(0, -1);
+    if (w.endsWith('ing')) return w.slice(0, -3);
+    if (w.endsWith('ed')) return w.slice(0, -2);
+    if (w.endsWith('er')) return w.slice(0, -2);
+    if (w.endsWith('ly')) return w.slice(0, -2);
+    return w;
+}
+
+function generateNGrams(word, minLen = 3) {
+    const ngrams = new Set();
+    for (let i = 0; i < word.length; i++) {
+        for (let j = i + minLen; j <= word.length && j <= i + 8; j++) {
+            ngrams.add(word.slice(i, j));
+        }
+    }
+    return [...ngrams];
+}
+
+function expandKeywords(keywords) {
+    const expanded = new Set();
+    keywords.forEach(kw => {
+        expanded.add(kw);
+        const stemmed = stem(kw);
+        if (stemmed !== kw) expanded.add(stemmed);
+        generateNGrams(kw, 3).forEach(ng => expanded.add(ng));
+    });
+    return [...expanded];
+}
+
 const newsData = [
     { id: 1, type: "breaking", category: "OpenAI", headline: "OpenAI Unveils GPT-5 with Human-Level Reasoning", shortDesc: "Revolutionary AI model achieves AGI milestone...", fullContent: "OpenAI has officially announced...", author: "Sarah Chen", publishDate: "March 30, 2026", timeAgo: "2 hours ago", readTime: "5 min read", tags: ["AI", "OpenAI", "GPT-5"], externalLink: "https://openai.com/blog/gpt-5", sourceName: "OpenAI Blog" },
     { id: 2, type: "trending", category: "Google", headline: "Google Gemini Dominates Multimodal AI Benchmark", shortDesc: "Gemini outperforms all competitors...", author: "Michael Torres", publishDate: "March 30, 2026", timeAgo: "4 hours ago", readTime: "3 min read", tags: ["Google", "Gemini"], externalLink: "https://blog.google/technology/ai/gemini-update/", sourceName: "Google Blog" },
@@ -196,32 +255,50 @@ function selectSuggestion(value) {
 }
 
 function extractKeywords(query) {
-    return query.toLowerCase().replace(/[^\w\s]/g, "").split(" ").filter(word => word.length > 2 && !stopWords.includes(word));
+    return query.toLowerCase().replace(/[^\w\s]/g, "").split(" ").filter(word => word.length > 1 && !stopWords.includes(word));
 }
 
-function calculateScore(tool, keywords) {
+function calculateScore(tool, keywords, expandedKeywords) {
     if (keywords.length === 0) return 0;
     let score = 0;
     const toolName = tool.name.toLowerCase();
     const toolDesc = tool.description.toLowerCase();
     const toolTags = tool.tags.map(tag => tag.toLowerCase());
-    keywords.forEach(keyword => {
-        if (toolName.includes(keyword)) score += 10;
-        toolTags.forEach(tag => { if (tag.includes(keyword)) score += 5; });
-        if (toolDesc.includes(keyword)) score += 3;
+    const nameWords = toolName.split(' ');
+    let exactMatched = false;
+
+    expandedKeywords.forEach(keyword => {
+        if (nameWords.includes(keyword)) { score += 20; exactMatched = true; }
+        else if (toolName.includes(keyword)) score += 10;
+        if (toolTags.includes(keyword)) score += 8;
+        else toolTags.forEach(tag => { if (tag.includes(keyword)) score += 4; });
+        if (toolDesc.includes(keyword)) score += 2;
     });
+
+    if (!exactMatched) {
+        keywords.forEach(keyword => {
+            const threshold = keyword.length <= 4 ? 1 : keyword.length <= 7 ? 2 : 3;
+            const nameDist = levenshteinDistance(keyword, toolName);
+            if (nameDist > 0 && nameDist <= threshold) score += Math.max(0, 15 - nameDist * 3);
+            toolTags.forEach(tag => {
+                const tagDist = levenshteinDistance(keyword, tag);
+                if (tagDist > 0 && tagDist <= threshold) score += Math.max(0, 5 - tagDist);
+            });
+        });
+    }
     return score;
 }
 
-function getMatchReasons(tool, keywords) {
+function getMatchReasons(tool, keywords, expandedKeywords) {
     const reasons = [];
     const toolName = tool.name.toLowerCase();
     const toolTags = tool.tags.map(tag => tag.toLowerCase());
-    keywords.forEach(keyword => {
-        if (toolName.includes(keyword)) reasons.push(tool.name);
-        toolTags.forEach(tag => { if (tag.includes(keyword) && !reasons.includes(tag)) reasons.push(tag); });
+    const allQueryTerms = [...new Set([...keywords, ...expandedKeywords])];
+    allQueryTerms.forEach(term => {
+        if (toolName.includes(term)) reasons.push(tool.name);
+        toolTags.forEach(tag => { if (tag.includes(term) && !reasons.includes(tag)) reasons.push(tag); });
     });
-    return [...new Set(reasons)].slice(0, 3);
+    return [...new Set(reasons)].slice(0, 4);
 }
 
 function getLogoUrl(link) {
@@ -249,6 +326,50 @@ function hideOriginalContent() {
 
 function goHome() { clearSearch(); }
 
+function findDidYouMean(query, keywords) {
+    const queryLower = query.toLowerCase().trim();
+    const suggestions = [];
+    aiTools.forEach(tool => {
+        const name = tool.name.toLowerCase();
+        const dist = levenshteinDistance(queryLower, name);
+        if (dist > 0 && dist <= Math.min(3, Math.floor(name.length / 3) + 1)) {
+            suggestions.push({ name: tool.name, dist });
+        }
+        keywords.forEach(kw => {
+            if (kw.length >= 3) {
+                const kwDist = levenshteinDistance(kw, name);
+                if (kwDist > 0 && kwDist <= Math.min(2, Math.floor(name.length / 3))) {
+                    suggestions.push({ name: tool.name, dist: kwDist });
+                }
+            }
+        });
+    });
+    return [...new Map(suggestions.map(s => [s.name, s])).values()].sort((a, b) => a.dist - b.dist).slice(0, 3);
+}
+
+function findRelatedTools(keywords, maxResults = 8) {
+    const matchedTags = new Set();
+    const queryTerms = [...keywords, ...keywords.flatMap(k => generateNGrams(k, 3))];
+
+    allTags.forEach(tag => {
+        queryTerms.forEach(term => {
+            if (tag.includes(term) || levenshteinDistance(term, tag) <= 2) matchedTags.add(tag);
+        });
+    });
+
+    if (matchedTags.size === 0) return [];
+
+    const scored = {};
+    matchedTags.forEach(tag => {
+        (tagToolMap[tag] || []).forEach(tool => {
+            const key = tool.name;
+            if (!scored[key]) scored[key] = { tool, overlap: 0 };
+            scored[key].overlap += 1;
+        });
+    });
+
+    return Object.values(scored).sort((a, b) => b.overlap - a.overlap).slice(0, maxResults);
+}
 function searchAI() {
     const query = document.getElementById("searchInput").value.trim();
     const resultsDiv = document.getElementById("results");
@@ -258,8 +379,41 @@ function searchAI() {
     hideOriginalContent();
     const keywords = extractKeywords(query);
     if (keywords.length === 0) { resultsDiv.innerHTML = '<p class="no-results">Please enter more specific keywords</p>'; return; }
-    const filtered = aiTools.map(tool => ({ tool, score: calculateScore(tool, keywords), matchReasons: getMatchReasons(tool, keywords) })).filter(item => item.score > 0).sort((a, b) => b.score - a.score);
-    if (filtered.length === 0) { resultsDiv.innerHTML = `<p class="no-results">No AI tools found for "${query}"</p><button class="clear-search-btn" onclick="clearSearch()">← Back to Home</button>`; return; }
+    const expandedKeywords = expandKeywords(keywords);
+
+    const filtered = aiTools.map(tool => ({
+        tool,
+        score: calculateScore(tool, keywords, expandedKeywords),
+        matchReasons: getMatchReasons(tool, keywords, expandedKeywords)
+    })).filter(item => item.score > 0).sort((a, b) => b.score - a.score);
+
+    if (filtered.length === 0) {
+        const didYouMean = findDidYouMean(query, keywords);
+        const relatedTools = findRelatedTools(keywords);
+        let html = `<div class="results-header"><p class="results-count">No exact matches for "${query}"</p><button class="clear-search-btn" onclick="clearSearch()">← Back to Home</button></div>`;
+
+        if (didYouMean.length > 0) {
+            html += `<div class="did-you-mean"><p>Did you mean:</p>${didYouMean.map(s => `<button class="did-you-mean-btn" onclick="searchQuery('${s.name.replace(/'/g, "\\'")}')">${s.name}</button>`).join('')}</div>`;
+        }
+
+        if (relatedTools.length > 0) {
+            html += `<div class="related-section"><h3>🔍 Recommended for you</h3><p class="related-subtitle">Based on your search for "${query}"</p><div class="results-grid">`;
+            relatedTools.forEach(item => {
+                const tool = item.tool;
+                html += `<div class="card result-card"><div class="card-header"><img src="${getLogoUrl(tool.link)}" alt="${tool.name}" class="tool-logo"><div class="tool-title"><h3>${tool.name}</h3><a href="${tool.link}" target="_blank" class="tool-link">Visit Website →</a></div></div><p class="tool-description">${tool.description}</p><div class="best-for"><span class="best-for-label">⭐ Best For:</span><span class="best-for-text">${tool.bestFor}</span></div><div class="match-tags"><span class="tag tag-related">Related</span></div></div>`;
+            });
+            html += `</div></div>`;
+        }
+
+        if (didYouMean.length === 0 && relatedTools.length === 0) {
+            html += `<p class="no-results">No AI tools found for "${query}"</p>`;
+        }
+
+        resultsDiv.innerHTML = html;
+        resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+    }
+
     resultsDiv.innerHTML = `<div class="results-header"><p class="results-count">Found ${filtered.length} AI tools for "${query}"</p><button class="clear-search-btn" onclick="clearSearch()">← Back to Home</button></div><div class="results-grid">`;
     filtered.forEach(item => {
         const tool = item.tool;
@@ -267,6 +421,11 @@ function searchAI() {
     });
     resultsDiv.innerHTML += '</div>';
     resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function searchQuery(value) {
+    document.getElementById("searchInput").value = value;
+    searchAI();
 }
 
 function clearSearch() {
@@ -300,6 +459,7 @@ window.selectSuggestion = selectSuggestion;
 window.clearSearch = clearSearch;
 window.goHome = goHome;
 window.searchAI = searchAI;
+window.searchQuery = searchQuery;
 window.openNewsModal = openNewsModal;
 window.closeNewsModal = closeNewsModal;
 window.goBackInHistory = goBackInHistory;

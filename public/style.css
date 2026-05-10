@@ -990,6 +990,66 @@ iframe {
     border: 1px solid rgba(0, 255, 200, 0.1);
 }
 
+.did-you-mean {
+    background: rgba(20, 30, 50, 0.7);
+    border: 1px solid rgba(0, 255, 200, 0.15);
+    border-radius: 16px;
+    padding: 20px 25px;
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.did-you-mean p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.did-you-mean-btn {
+    background: linear-gradient(135deg, rgba(157, 78, 221, 0.2), rgba(0, 255, 255, 0.1));
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    color: #00FFFF;
+    padding: 8px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.did-you-mean-btn:hover {
+    background: linear-gradient(135deg, rgba(157, 78, 221, 0.4), rgba(0, 255, 255, 0.2));
+    border-color: rgba(0, 255, 255, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 255, 255, 0.2);
+}
+
+.tag-related {
+    background: linear-gradient(135deg, rgba(255, 165, 0, 0.25), rgba(255, 100, 0, 0.15)) !important;
+    color: #FFA500 !important;
+    border-color: rgba(255, 165, 0, 0.3) !important;
+}
+
+.related-section {
+    margin-top: 30px;
+}
+
+.related-section h3 {
+    color: #fff;
+    font-size: 1.3rem;
+    margin-bottom: 5px;
+}
+
+.related-subtitle {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
 .video-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
