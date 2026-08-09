@@ -2,6 +2,76 @@ import { aiTools } from "./data.js";
 
 const stopWords = ["the", "best", "for", "is", "which", "a", "an", "and", "or", "ai", "can", "i", "you", "what", "how", "to", "with", "my", "make", "create", "use"];
 
+function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[c]);
+}
+
+function jsEscape(str) {
+    return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+function debounce(fn, ms) {
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), ms);
+    };
+}
+
+function highlightMatch(text, query) {
+    const str = String(text);
+    if (!query) return escapeHtml(str);
+    const idx = str.toLowerCase().indexOf(query.toLowerCase());
+    if (idx === -1) return escapeHtml(str);
+    return escapeHtml(str.slice(0, idx)) +
+        '<b>' + escapeHtml(str.slice(idx, idx + query.length)) + '</b>' +
+        escapeHtml(str.slice(idx + query.length));
+}
+
+const HISTORY_KEY = 'searchAI_history';
+const MAX_HISTORY = 8;
+
+function getHistory() {
+    try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
+    catch { return []; }
+}
+
+function addToHistory(query) {
+    const q = query.trim();
+    if (!q) return;
+    const history = [q, ...getHistory().filter(h => h.toLowerCase() !== q.toLowerCase())].slice(0, MAX_HISTORY);
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); } catch {}
+}
+
+function clearHistory() {
+    try { localStorage.removeItem(HISTORY_KEY); } catch {}
+    showSuggestions(document.getElementById("searchInput").value);
+}
+
+const trendingSearches = [
+    "best AI for video",
+    "AI image generator",
+    "AI coding assistant",
+    "AI voice generator",
+    "AI presentation maker",
+    "free AI writing tools"
+];
+
+const categoryChips = [
+    { label: "All", match: null },
+    { label: "Chat", match: ["chat", "conversation", "assistant", "gpt", "llm", "emotional", "support"] },
+    { label: "Video", match: ["video", "text-to-video", "animation", "avatar", "film", "shorts", "reels"] },
+    { label: "Image", match: ["image", "art", "illustration", "text-to-image", "photorealistic", "typography", "background"] },
+    { label: "Coding", match: ["coding", "programming", "code", "ide", "autocomplete", "github", "deployment"] },
+    { label: "Writing", match: ["writing", "content", "copy", "blog", "grammar", "paraphrasing", "proofreading"] },
+    { label: "Audio", match: ["audio", "music", "voice", "speech", "tts", "vocals", "soundtrack"] },
+    { label: "Research", match: ["research", "academic", "papers", "science", "pdf", "transcription", "literature"] },
+    { label: "Design", match: ["design", "ui", "mockup", "logo", "branding", "presentation", "slides", "prototype"] },
+    { label: "Marketing", match: ["marketing", "social media", "seo", "sales", "email", "hashtags", "crm"] }
+];
+
 const allKeywords = [...new Set(
     aiTools.flatMap(tool => [
         ...tool.tags,
@@ -49,10 +119,8 @@ function stem(word) {
 
 function generateNGrams(word, minLen = 3) {
     const ngrams = new Set();
-    for (let i = 0; i < word.length; i++) {
-        for (let j = i + minLen; j <= word.length && j <= i + 8; j++) {
-            ngrams.add(word.slice(i, j));
-        }
+    for (let j = minLen; j <= Math.min(word.length, 8); j++) {
+        ngrams.add(word.slice(0, j));
     }
     return [...ngrams];
 }
@@ -99,6 +167,13 @@ let historyIndex = -1;
 let isSearchActive = false;
 let activeToolIndex = 0;
 
+let suggestionItems = [];
+let suggestionIndex = -1;
+let currentQuery = '';
+let currentKeywords = [];
+let currentResults = [];
+let activeChip = 'All';
+
 const trendingTools = [
     { name: "ChatGPT", description: "Advanced AI chatbot", link: "https://chat.openai.com", icon: "🤖", userCount: "100M+" },
     { name: "Claude", description: "AI assistant for reasoning", link: "https://claude.ai", icon: "🧠", userCount: "50M+" },
@@ -127,15 +202,26 @@ function renderTrendingTools() {
     carousel.innerHTML = trendingTools.map(tool => `
         <a href="${tool.link}" target="_blank" class="trending-tool-card">
             <div class="trending-tool-logo">
-                <img src="${getToolLogoUrl(tool.link)}" alt="${tool.name}" onerror="this.parentElement.innerHTML='<span class="trending-tool-icon">${tool.icon}</span>'">
+                <img src="${getToolLogoUrl(tool.link)}" alt="${escapeHtml(tool.name)}" onerror="this.parentElement.innerHTML='<span class=&quot;trending-tool-icon&quot;>${tool.icon}</span>'">
             </div>
             <div class="trending-tool-info">
-                <h3>${tool.name}</h3>
-                <p>${tool.description}</p>
+                <h3>${escapeHtml(tool.name)}</h3>
+                <p>${escapeHtml(tool.description)}</p>
                 <span class="trending-user-count">👥 ${tool.userCount}</span>
             </div>
         </a>
     `).join('');
+}
+
+function renderTrendingSearches() {
+    const container = document.getElementById('trendingSearches');
+    if (!container) return;
+    container.innerHTML = `
+        <span class="trending-searches-label">🔥 Trending:</span>
+        ${trendingSearches.map(term => `
+            <button class="trending-search-chip" onclick="searchQuery('${jsEscape(term)}')">${escapeHtml(term)}</button>
+        `).join('')}
+    `;
 }
 
 function renderToolDetails() {
@@ -221,36 +307,72 @@ function renderNewsCards() {
 
 function showSuggestions(query) {
     const suggestionsDiv = document.getElementById("suggestions");
-    if (query.length < 1) { suggestionsDiv.innerHTML = ""; suggestionsDiv.style.display = "none"; return; }
+    const queryRaw = query.trim();
+    const queryLower = queryRaw.toLowerCase();
+    suggestionIndex = -1;
+    suggestionItems = [];
 
-    const queryLower = query.toLowerCase();
+    if (!queryLower) {
+        const history = getHistory();
+        if (history.length === 0) { suggestionsDiv.innerHTML = ""; suggestionsDiv.style.display = "none"; return; }
+        suggestionItems = history.map(h => ({ value: h, icon: "🕘" }));
+        let html = '<div class="suggestion-section">🕘 Recent Searches</div>';
+        html += history.map(h => `<div class="suggestion-item" onclick="selectSuggestion('${jsEscape(h)}')"><span class="suggestion-icon">🕘</span><span>${escapeHtml(h)}</span></div>`).join('');
+        html += '<div class="suggestion-clear" onclick="clearHistory()">🗑️ Clear history</div>';
+        suggestionsDiv.innerHTML = html;
+        suggestionsDiv.style.display = "block";
+        return;
+    }
+
+    const historyMatches = getHistory().filter(h => h.toLowerCase().includes(queryLower)).slice(0, 3);
+    const popularMatches = trendingSearches.filter(term => term.toLowerCase().includes(queryLower));
     const toolMatches = aiTools.filter(tool => tool.name.toLowerCase().includes(queryLower) || tool.description.toLowerCase().includes(queryLower)).slice(0, 5);
     const keywordMatches = allKeywords.filter(k => k.toLowerCase().includes(queryLower)).slice(0, 8);
-    const popularSearches = ["best AI for video", "free AI image generator", "AI coding assistant"].filter(term => term.toLowerCase().includes(queryLower));
 
-    if (toolMatches.length === 0 && keywordMatches.length === 0 && popularSearches.length === 0) { suggestionsDiv.style.display = "none"; return; }
+    historyMatches.forEach(h => suggestionItems.push({ value: h, icon: "🕘" }));
+    popularMatches.forEach(term => suggestionItems.push({ value: term, icon: "🔥" }));
+    toolMatches.forEach(tool => suggestionItems.push({ value: tool.name, icon: "🤖" }));
+    keywordMatches.forEach(k => suggestionItems.push({ value: k, icon: "🔍" }));
+
+    if (suggestionItems.length === 0) { suggestionsDiv.style.display = "none"; return; }
 
     let html = "";
-    if (popularSearches.length > 0) {
+    if (historyMatches.length > 0) {
+        html += '<div class="suggestion-section">🕘 Recent</div>';
+        html += historyMatches.map(h => `<div class="suggestion-item" onclick="selectSuggestion('${jsEscape(h)}')"><span class="suggestion-icon">🕘</span><span>${highlightMatch(h, queryLower)}</span></div>`).join('');
+    }
+    if (popularMatches.length > 0) {
         html += '<div class="suggestion-section">🔥 Popular Searches</div>';
-        popularSearches.forEach(term => { html += `<div class="suggestion-item" onclick="selectSuggestion('${term}')"><span class="suggestion-icon">🔥</span> ${term}</div>`; });
+        html += popularMatches.map(term => `<div class="suggestion-item" onclick="selectSuggestion('${jsEscape(term)}')"><span class="suggestion-icon">🔥</span><span>${highlightMatch(term, queryLower)}</span></div>`).join('');
     }
     if (toolMatches.length > 0) {
         html += '<div class="suggestion-section">🤖 AI Tools</div>';
-        toolMatches.forEach(tool => { html += `<div class="suggestion-item" onclick="selectSuggestion('${tool.name}')"><img src="${getToolLogoUrl(tool.link)}" alt="" class="suggestion-logo"><span>${tool.name}</span><span class="suggestion-category">${tool.tags[0]}</span></div>`; });
+        html += toolMatches.map(tool => `<div class="suggestion-item" onclick="selectSuggestion('${jsEscape(tool.name)}')"><img src="${getToolLogoUrl(tool.link)}" alt="" class="suggestion-logo" onerror="this.style.display='none'"><span>${highlightMatch(tool.name, queryLower)}</span><span class="suggestion-category">${escapeHtml(tool.tags[0])}</span></div>`).join('');
     }
     if (keywordMatches.length > 0) {
         html += '<div class="suggestion-section">🔍 Keywords</div>';
-        keywordMatches.forEach(match => { html += `<div class="suggestion-item" onclick="selectSuggestion('${match}')"><span class="suggestion-icon">🔍</span> ${match}</div>`; });
+        html += keywordMatches.map(k => `<div class="suggestion-item" onclick="selectSuggestion('${jsEscape(k)}')"><span class="suggestion-icon">🔍</span><span>${highlightMatch(k, queryLower)}</span></div>`).join('');
     }
     suggestionsDiv.innerHTML = html;
     suggestionsDiv.style.display = "block";
+}
+
+function moveSuggestion(dir) {
+    const items = document.querySelectorAll('#suggestions .suggestion-item');
+    if (items.length === 0) return;
+    if (suggestionIndex >= 0 && suggestionIndex < items.length) items[suggestionIndex].classList.remove('active');
+    suggestionIndex = (suggestionIndex + dir + items.length) % items.length;
+    items[suggestionIndex].classList.add('active');
+    items[suggestionIndex].scrollIntoView({ block: 'nearest' });
 }
 
 function selectSuggestion(value) {
     document.getElementById("searchInput").value = value;
     document.getElementById("suggestions").innerHTML = "";
     document.getElementById("suggestions").style.display = "none";
+    suggestionIndex = -1;
+    suggestionItems = [];
+    addToHistory(value);
     searchAI();
 }
 
@@ -312,6 +434,8 @@ function showOriginalContent() {
     document.getElementById('toolDetailsSection').style.display = 'block';
     document.querySelector('.videos').style.display = 'block';
     document.getElementById('backBtn').style.display = 'none';
+    const trendingRow = document.getElementById('trendingSearches');
+    if (trendingRow) trendingRow.style.display = 'flex';
     isSearchActive = false;
 }
 
@@ -321,6 +445,8 @@ function hideOriginalContent() {
     document.getElementById('toolDetailsSection').style.display = 'none';
     document.querySelector('.videos').style.display = 'none';
     document.getElementById('backBtn').style.display = 'flex';
+    const trendingRow = document.getElementById('trendingSearches');
+    if (trendingRow) trendingRow.style.display = 'none';
     isSearchActive = true;
 }
 
@@ -370,61 +496,209 @@ function findRelatedTools(keywords, maxResults = 8) {
 
     return Object.values(scored).sort((a, b) => b.overlap - a.overlap).slice(0, maxResults);
 }
-function searchAI() {
+function searchAI(opts = {}) {
     const query = document.getElementById("searchInput").value.trim();
     const resultsDiv = document.getElementById("results");
-    document.getElementById("suggestions").innerHTML = "";
-    document.getElementById("suggestions").style.display = "none";
-    if (!query) { resultsDiv.innerHTML = ''; showOriginalContent(); return; }
+    if (!opts.keepSuggestions) {
+        document.getElementById("suggestions").innerHTML = "";
+        document.getElementById("suggestions").style.display = "none";
+    }
+    if (!query) {
+        resultsDiv.innerHTML = '';
+        renderFilterChips([]);
+        currentQuery = '';
+        currentKeywords = [];
+        currentResults = [];
+        activeChip = 'All';
+        showOriginalContent();
+        return;
+    }
     hideOriginalContent();
     const keywords = extractKeywords(query);
-    if (keywords.length === 0) { resultsDiv.innerHTML = '<p class="no-results">Please enter more specific keywords</p>'; return; }
+    if (keywords.length === 0) {
+        resultsDiv.innerHTML = '<p class="no-results">Please enter more specific keywords</p>';
+        renderFilterChips([]);
+        currentQuery = query;
+        currentKeywords = [];
+        currentResults = [];
+        activeChip = 'All';
+        return;
+    }
     const expandedKeywords = expandKeywords(keywords);
 
-    const filtered = aiTools.map(tool => ({
+    currentQuery = query;
+    currentKeywords = keywords;
+    currentResults = aiTools.map(tool => ({
         tool,
         score: calculateScore(tool, keywords, expandedKeywords),
         matchReasons: getMatchReasons(tool, keywords, expandedKeywords)
     })).filter(item => item.score > 0).sort((a, b) => b.score - a.score);
 
+    if (activeChip !== 'All') {
+        const chip = categoryChips.find(c => c.label === activeChip);
+        const chipHasTools = chip && currentResults.some(item => item.tool.tags.some(t => chip.match.includes(t.toLowerCase())));
+        if (!chipHasTools) activeChip = 'All';
+    }
+
+    renderFilterChips(currentResults);
+    renderResults(applyChipFilter());
+
+    if (opts.scroll !== false) resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function applyChipFilter() {
+    if (activeChip === 'All') return currentResults;
+    const chip = categoryChips.find(c => c.label === activeChip);
+    if (!chip) return currentResults;
+    return currentResults.filter(item => item.tool.tags.some(t => chip.match.includes(t.toLowerCase())));
+}
+
+function renderFilterChips(results) {
+    const chipsDiv = document.getElementById('filterChips');
+    if (!chipsDiv) return;
+    if (!results || results.length === 0) {
+        chipsDiv.innerHTML = '';
+        chipsDiv.style.display = 'none';
+        return;
+    }
+    const available = new Set();
+    results.forEach(item => {
+        item.tool.tags.forEach(tag => {
+            const t = tag.toLowerCase();
+            categoryChips.forEach(c => { if (c.match && c.match.includes(t)) available.add(c.label); });
+        });
+    });
+    chipsDiv.innerHTML = categoryChips.filter(c => c.label === 'All' || available.has(c.label))
+        .map(c => `<button class="chip ${activeChip === c.label ? 'active' : ''}" onclick="setChip('${c.label}')">${c.label}</button>`).join('');
+    chipsDiv.style.display = 'flex';
+}
+
+function setChip(label) {
+    activeChip = label;
+    renderFilterChips(currentResults);
+    const resultsDiv = document.getElementById("results");
+    const filtered = applyChipFilter();
+    resultsDiv.innerHTML = buildResultsHTML(filtered);
     if (filtered.length === 0) {
-        const didYouMean = findDidYouMean(query, keywords);
-        const relatedTools = findRelatedTools(keywords);
-        let html = `<div class="results-header"><p class="results-count">No exact matches for "${query}"</p><button class="clear-search-btn" onclick="clearSearch()">← Back to Home</button></div>`;
+        resultsDiv.innerHTML = `<div class="results-header"><p class="results-count">No tools in "${label}" match "${escapeHtml(currentQuery)}"</p><button class="clear-search-btn" onclick="clearSearch()">← Back to Home</button></div>` + renderRelatedSearches();
+    }
+}
+
+function toolCard(tool, matchReasons) {
+    const reasons = Array.isArray(matchReasons) ? matchReasons : [matchReasons];
+    return `<div class="card result-card"><div class="card-header"><img src="${getLogoUrl(tool.link)}" alt="${escapeHtml(tool.name)}" class="tool-logo"><div class="tool-title"><h3>${escapeHtml(tool.name)}</h3><a href="${tool.link}" target="_blank" class="tool-link">Visit Website →</a></div></div><p class="tool-description">${escapeHtml(tool.description)}</p><div class="best-for"><span class="best-for-label">⭐ Best For:</span><span class="best-for-text">${escapeHtml(tool.bestFor)}</span></div><div class="match-tags">${reasons.map(r => `<span class="tag">${escapeHtml(r)}</span>`).join('')}</div></div>`;
+}
+
+function buildResultsHTML(filtered) {
+    if (filtered.length === 0) {
+        const didYouMean = findDidYouMean(currentQuery, currentKeywords);
+        const relatedTools = findRelatedTools(currentKeywords);
+        let html = `<div class="results-header"><p class="results-count">No exact matches for "${escapeHtml(currentQuery)}"</p><button class="clear-search-btn" onclick="clearSearch()">← Back to Home</button></div>`;
 
         if (didYouMean.length > 0) {
-            html += `<div class="did-you-mean"><p>Did you mean:</p>${didYouMean.map(s => `<button class="did-you-mean-btn" onclick="searchQuery('${s.name.replace(/'/g, "\\'")}')">${s.name}</button>`).join('')}</div>`;
+            html += `<div class="did-you-mean"><p>Did you mean:</p>${didYouMean.map(s => `<button class="did-you-mean-btn" onclick="searchQuery('${jsEscape(s.name)}')">${escapeHtml(s.name)}</button>`).join('')}</div>`;
         }
 
         if (relatedTools.length > 0) {
-            html += `<div class="related-section"><h3>🔍 Recommended for you</h3><p class="related-subtitle">Based on your search for "${query}"</p><div class="results-grid">`;
-            relatedTools.forEach(item => {
-                const tool = item.tool;
-                html += `<div class="card result-card"><div class="card-header"><img src="${getLogoUrl(tool.link)}" alt="${tool.name}" class="tool-logo"><div class="tool-title"><h3>${tool.name}</h3><a href="${tool.link}" target="_blank" class="tool-link">Visit Website →</a></div></div><p class="tool-description">${tool.description}</p><div class="best-for"><span class="best-for-label">⭐ Best For:</span><span class="best-for-text">${tool.bestFor}</span></div><div class="match-tags"><span class="tag tag-related">Related</span></div></div>`;
-            });
-            html += `</div></div>`;
+            html += `<div class="related-section"><h3>🔍 Recommended for you</h3><p class="related-subtitle">Based on your search for "${escapeHtml(currentQuery)}"</p><div class="results-grid">`;
+            relatedTools.forEach(item => { html += toolCard(item.tool, ['Related']); });
+            html += '</div></div>';
         }
 
         if (didYouMean.length === 0 && relatedTools.length === 0) {
-            html += `<p class="no-results">No AI tools found for "${query}"</p>`;
+            html += `<p class="no-results">No AI tools found for "${escapeHtml(currentQuery)}"</p>`;
         }
 
-        resultsDiv.innerHTML = html;
-        resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        return;
+        html += renderRelatedSearches(true);
+        return html;
     }
 
-    resultsDiv.innerHTML = `<div class="results-header"><p class="results-count">Found ${filtered.length} AI tools for "${query}"</p><button class="clear-search-btn" onclick="clearSearch()">← Back to Home</button></div><div class="results-grid">`;
-    filtered.forEach(item => {
-        const tool = item.tool;
-        resultsDiv.innerHTML += `<div class="card result-card"><div class="card-header"><img src="${getLogoUrl(tool.link)}" alt="${tool.name}" class="tool-logo"><div class="tool-title"><h3>${tool.name}</h3><a href="${tool.link}" target="_blank" class="tool-link">Visit Website →</a></div></div><p class="tool-description">${tool.description}</p><div class="best-for"><span class="best-for-label">⭐ Best For:</span><span class="best-for-text">${tool.bestFor}</span></div><div class="match-tags">${item.matchReasons.map(r => `<span class="tag">${r}</span>`).join('')}</div></div>`;
+    let html = `<div class="results-header"><p class="results-count">Found ${filtered.length} AI tools for "${escapeHtml(currentQuery)}"</p><button class="clear-search-btn" onclick="clearSearch()">← Back to Home</button></div><div class="results-grid">`;
+    filtered.forEach(item => { html += toolCard(item.tool, item.matchReasons); });
+    html += '</div>';
+
+    html += renderRecommendations(filtered);
+    html += renderRelatedNews();
+    html += renderRelatedSearches(false);
+    return html;
+}
+
+function renderResults(filtered) {
+    document.getElementById("results").innerHTML = buildResultsHTML(filtered);
+}
+
+function renderRecommendations(filtered) {
+    const visibleNames = new Set(filtered.map(item => item.tool.name));
+    const topTools = filtered.slice(0, 3);
+    const tagCounts = {};
+    topTools.forEach(item => {
+        item.tool.tags.forEach(tag => {
+            const t = tag.toLowerCase();
+            if (t.length < 3) return;
+            (tagToolMap[t] || []).forEach(tool => {
+                if (visibleNames.has(tool.name)) return;
+                if (!tagCounts[tool.name]) tagCounts[tool.name] = { tool, overlap: 0 };
+                tagCounts[tool.name].overlap += 1;
+            });
+        });
     });
-    resultsDiv.innerHTML += '</div>';
-    resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const recs = Object.values(tagCounts).sort((a, b) => b.overlap - a.overlap).slice(0, 4);
+    if (recs.length === 0) return '';
+    let html = `<div class="related-section"><h3>💡 Recommended for you</h3><p class="related-subtitle">Similar to what you searched for</p><div class="results-grid">`;
+    recs.forEach(item => { html += toolCard(item.tool, ['Recommended']); });
+    html += '</div></div>';
+    return html;
+}
+
+function renderRelatedNews() {
+    const terms = currentKeywords;
+    const matches = newsData.filter(n => {
+        const hay = `${n.headline} ${n.category} ${n.tags.join(' ')}`.toLowerCase();
+        return terms.some(t => hay.includes(t));
+    }).slice(0, 3);
+    if (matches.length === 0) return '';
+    return `<div class="related-section"><h3>📰 Related AI News</h3><p class="related-subtitle">Latest news matching your search</p><div class="related-news-grid">${matches.map(n => `
+        <div class="news-card ${n.type}" onclick="openNewsModal(${n.id})">
+            <div class="news-badge-top">${getTypeEmoji(n.type)} ${n.type.replace('-', ' ').toUpperCase()}</div>
+            <div class="news-content">
+                <span class="news-category">${escapeHtml(n.category)}</span>
+                <h3>${escapeHtml(n.headline)}</h3>
+                <p>${escapeHtml(n.shortDesc)}</p>
+                <div class="news-meta"><span class="news-time">${n.timeAgo}</span><span class="news-read">${n.readTime}</span></div>
+            </div>
+        </div>`).join('')}</div></div>`;
+}
+
+function buildRelatedSearches(query, keywords) {
+    const queries = [];
+    const seen = new Set([query.toLowerCase()]);
+    keywords.forEach(kw => {
+        const cat = categoryChips.find(c => c.match && c.match.includes(kw));
+        if (cat && cat.label !== 'All') {
+            const phrase = `best ${cat.label.toLowerCase()} AI tools`;
+            if (!seen.has(phrase)) { seen.add(phrase); queries.push(phrase); }
+        }
+        if (kw.length >= 3) {
+            const phrase = `${kw} AI tools`;
+            if (!seen.has(phrase)) { seen.add(phrase); queries.push(phrase); }
+        }
+    });
+    currentResults.slice(0, 2).forEach(item => {
+        const phrase = `${item.tool.name} alternatives`;
+        if (!seen.has(phrase.toLowerCase())) { seen.add(phrase.toLowerCase()); queries.push(phrase); }
+    });
+    return queries.slice(0, 6);
+}
+
+function renderRelatedSearches(noResults) {
+    const related = buildRelatedSearches(currentQuery, currentKeywords);
+    if (related.length === 0) return '';
+    return `<div class="related-searches"><h3>${noResults ? '🔗 Related Searches' : '🔗 People also search for'}</h3><div class="related-search-chips">${related.map(term => `<button class="related-search-chip" onclick="searchQuery('${jsEscape(term)}')">${escapeHtml(term)}</button>`).join('')}</div></div>`;
 }
 
 function searchQuery(value) {
     document.getElementById("searchInput").value = value;
+    addToHistory(value);
     searchAI();
 }
 
@@ -432,6 +706,11 @@ function clearSearch() {
     document.getElementById("searchInput").value = '';
     document.getElementById("results").innerHTML = '';
     activeToolIndex = 0;
+    currentQuery = '';
+    currentKeywords = [];
+    currentResults = [];
+    activeChip = 'All';
+    renderFilterChips([]);
     showOriginalContent();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -453,7 +732,22 @@ function goBackInHistory() {
 
 function closeNewsModal() { document.getElementById('newsModal').classList.remove('active'); document.body.style.overflow = 'auto'; newsHistory = []; historyIndex = -1; }
 
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeNewsModal(); });
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeNewsModal();
+        const suggestionsDiv = document.getElementById("suggestions");
+        if (suggestionsDiv) suggestionsDiv.style.display = "none";
+        suggestionIndex = -1;
+        return;
+    }
+    const suggestionsDiv = document.getElementById("suggestions");
+    if (!suggestionsDiv || suggestionsDiv.style.display === 'none' || suggestionItems.length === 0) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); moveSuggestion(1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); moveSuggestion(-1); }
+    else if (e.key === 'Enter') {
+        if (suggestionIndex >= 0) { e.preventDefault(); selectSuggestion(suggestionItems[suggestionIndex].value); }
+    }
+});
 
 window.selectSuggestion = selectSuggestion;
 window.clearSearch = clearSearch;
@@ -463,16 +757,50 @@ window.searchQuery = searchQuery;
 window.openNewsModal = openNewsModal;
 window.closeNewsModal = closeNewsModal;
 window.goBackInHistory = goBackInHistory;
+window.setChip = setChip;
+window.clearHistory = clearHistory;
 
 document.addEventListener('DOMContentLoaded', () => {
     renderTrendingTools();
     renderNewsCards();
     renderToolDetails();
+    renderTrendingSearches();
     const searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('input', (e) => { showSuggestions(e.target.value); if (e.target.value.trim() === '') { document.getElementById("results").innerHTML = ''; showOriginalContent(); } });
-    searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') searchAI(); });
+
+    const debouncedInstant = debounce((value) => {
+        const trimmed = value.trim();
+        if (trimmed.length >= 2 && trimmed !== currentQuery) {
+            searchAI({ keepSuggestions: true, scroll: false });
+        }
+    }, 250);
+
+    searchInput.addEventListener('input', (e) => {
+        const value = e.target.value;
+        showSuggestions(value);
+        if (value.trim() === '') {
+            document.getElementById("results").innerHTML = '';
+            renderFilterChips([]);
+            currentQuery = '';
+            currentKeywords = [];
+            currentResults = [];
+            activeChip = 'All';
+            showOriginalContent();
+        } else {
+            debouncedInstant(value);
+        }
+    });
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const value = searchInput.value.trim();
+            if (!value) return;
+            document.getElementById("suggestions").style.display = "none";
+            suggestionIndex = -1;
+            addToHistory(value);
+            searchAI();
+        }
+    });
     searchInput.addEventListener('blur', () => { setTimeout(() => { document.getElementById("suggestions").style.display = "none"; }, 200); });
-    searchInput.addEventListener('focus', () => { if (searchInput.value.length > 0) showSuggestions(searchInput.value); });
+    searchInput.addEventListener('focus', () => { showSuggestions(searchInput.value); });
 
     initWebSocket();
 });
